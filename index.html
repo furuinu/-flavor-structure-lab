@@ -28,14 +28,14 @@ aside{z-index:3;overflow-y:auto;background:var(--panel);border-right:1px solid v
 <body>
 <div class="app">
 <aside><div class="side-inner">
- <div class="logo"><div class="logo-symbol">◈</div><div><div class="pre">GENERATIVE TASTE ARCHITECTURE · v1.3</div><h1>FLAVOR STRUCTURE LAB <span style="color:#93a7ae;font-size:10px;font-weight:600">β</span></h1></div></div>
+ <div class="logo"><div class="logo-symbol">◈</div><div><div class="pre">GENERATIVE TASTE ARCHITECTURE · v1.4</div><h1>FLAVOR STRUCTURE LAB <span style="color:#93a7ae;font-size:10px;font-weight:600">β</span></h1></div></div>
  <div class="eyebrow">01 / GENERATION</div>
  <div class="heading"><b>シードから生成</b><span class="mini">再現可能</span></div>
  <div class="field"><input id="seed" type="text" inputmode="numeric" spellcheck="false" aria-label="シード番号" maxlength="40" placeholder="シードを入力"><button class="btn compact" id="same" title="同じシードで再生成">再現</button></div>
  <div style="height:10px"></div><button class="btn primary full" id="generate">↝　完全ランダム生成</button>
  <div class="hint" style="margin-top:9px">新規生成は前回の形状から独立。シードを再入力すると同じ構造を復元できます。</div>
- <div class="slider-wrap"><div class="sliderlabel"><span>生成プロファイル</span><span class="mini">構造体 / 生命体</span></div><select id="profile" aria-label="生成プロファイル"><option value="structure">味覚構造体（既存）</option><option value="lifeform">味覚生命体（左右対称）</option></select></div>
- <div class="hint">味覚生命体モードでは、2行×3色のルールは維持しつつ、ロールシャッハのような左右対称、古生代・分子模型・細胞群体を思わせるボディプランを優先します。</div>
+ <div class="slider-wrap"><div class="sliderlabel"><span>生成プロファイル</span><span class="mini">構造体 / 生命体</span></div><select id="profile" aria-label="生成プロファイル"><option value="structure">味覚構造体（従来）</option><option value="lifeform" selected>味覚生命体（生体形態）</option></select></div>
+ <div class="hint">味覚生命体は独立した造形エンジンを使用。分節する胴体と左右一対の付属器官を共有の骨格から成長させ、生き物と分子・細胞の境界を曖昧にします。</div>
  <div class="slider-wrap"><div class="sliderlabel"><span>生命体の系統</span><span id="lifeBiasValue">自動</span></div><select id="lifeBias" aria-label="生命体の系統"><option value="auto">自動</option><option value="paleo">古生物 / カンブリア</option><option value="molecular">高分子 / 分子模型</option><option value="microbe">細胞 / 微生物</option><option value="arthropod">節足 / 殻 / 触手</option><option value="membrane">膜 / 葉状 / ローブ</option></select></div>
  <div class="slider-wrap"><div class="sliderlabel"><span>左右対称性</span><span id="symmetryValue">88%</span></div><input type="range" min="0" max="100" value="88" id="symmetry"></div>
  <div class="slider-wrap"><div class="sliderlabel"><span>解釈の余地 / 曖昧さ</span><span id="ambiguityValue">70%</span></div><input type="range" min="0" max="100" value="70" id="ambiguity"></div>
@@ -54,7 +54,7 @@ aside{z-index:3;overflow-y:auto;background:var(--panel);border-right:1px solid v
  <hr class="divider">
  <div class="eyebrow">03 / STRUCTURAL LOGIC</div>
  <div class="heading"><b>生成された造形ルール</b></div>
- <div class="statlist"><span class="key">左側の形態</span><span class="value" id="modeL">—</span><span class="key">右側の形態</span><span class="value" id="modeR">—</span><span class="key">中央の関係</span><span class="value" id="relationship">—</span><span class="key">融合度 / 距離</span><span class="value" id="fusionStat">—</span><span class="key">ブーリアン加工</span><span class="value" id="boolStat">—</span><span class="key">ポリゴン数</span><span class="value" id="triangles">—</span></div>
+ <div class="statlist"><span class="key">左 / 主幹形態</span><span class="value" id="modeL">—</span><span class="key">右 / 付属形態</span><span class="value" id="modeR">—</span><span class="key">中心構造</span><span class="value" id="relationship">—</span><span class="key">融合 / 対称度</span><span class="value" id="fusionStat">—</span><span class="key">構造生成</span><span class="value" id="boolStat">—</span><span class="key">ポリゴン数</span><span class="value" id="triangles">—</span></div>
  <div class="heading"><b>味覚キーワード</b><span class="mini">造形・動き・質量へ反映</span></div>
  <select id="theme" aria-label="味覚構造の主題">
   <option value="random">毎回ランダム</option><option value="rhythm">リズム・拍動</option><option value="gravity">重量・沈降</option><option value="opposition">陰陽・対比</option><option value="growth">成長・展開</option><option value="fold">折込・圧縮</option><option value="dissolve">融解・滲出</option><option value="rupture">破裂・断裂</option><option value="quiet">静寂・余韻</option><option value="tension">緊張・解放</option><option value="chaos">混沌・逸脱</option><option value="fluid">流動・粘着</option>
@@ -95,7 +95,7 @@ aside{z-index:3;overflow-y:auto;background:var(--panel);border-right:1px solid v
  <div class="slider-wrap"><div class="sliderlabel"><span>PNG書き出し倍率</span><span id="exportScaleValue">2×</span></div><select id="exportScale" aria-label="PNG書き出し倍率"><option value="1">1×</option><option value="2" selected>2×</option><option value="3">3×</option><option value="4">4×</option></select></div><div class="button-grid"><button class="btn" id="savePng">画像 PNG</button><button class="btn" id="saveJson">設定 JSON</button><button class="btn" id="bookmark">☆ お気に入り</button><button class="btn" id="copyLink">再現リンク</button></div>
  <div class="heading"><b>お気に入りのシード</b><span class="mini" id="savedCount">0件</span></div>
  <div id="savedList" style="display:grid;gap:6px"></div>
- <p class="footer">v1.3：生命体モード専用のクイックプリセットを追加。古生物標本・高分子胞体・微生物群体・繊毛浮遊体などの作風をワンタップで呼び出し、そのまま3D観察・PNG保存できます。完全オフライン動作・外部ライブラリ不要。実際の3Dメッシュを生成し、加算・減算を符号付き距離場（SDF）で計算する試作版です。</p>
+ <p class="footer">v1.4：生命体専用の造形エンジンを新設。共通の胴体、分節、左右対応する鰭・葉状膜・繊毛・分子鎖を、独立した生体形態として生成します。従来の抽象構造体の使い回しではありません。完全オフライン動作・外部ライブラリ不要。</p>
 </div></aside>
 <main class="viewer" id="viewer">
  <canvas id="glview" aria-label="ドラッグで回転できる3D構造体"></canvas>
@@ -287,6 +287,7 @@ class Builder{
   if(rnd()<.28)secondary=pick(rnd,[8,12,16,17,18,19,20,21,22]);
   if(rnd()<.34&&!ROTATIONAL_MODES.has(primary)&&!ROTATIONAL_MODES.has(secondary))secondary=pick(rnd,[19,20,21,22]);
   let rate=between(rnd,.12,1.12)*(sem.quiet?.55:1)*(sem.energetic?1.18:1),amp=between(rnd,.018,.16)*(sem.weight?.74:1)*(sem.energetic?1.05:1);
+  if(this.recipe.profile==='lifeform'&&key.startsWith('mass-life')){primary=0;secondary=3;rate=.34;amp=.055;}
   this.part=idx;this.partKeys.push(key);this.partMotions.push([primary,secondary,rate,amp]);this.partPivots.push([pivot[0],pivot[1],pivot[2],between(rnd,-3.14,3.14)]);
  }
  setTexture(t){this.texture=t}
@@ -352,7 +353,177 @@ function connectors(builder,recipe){let r=generator(recipe.seed,'connectors'),d=
  if(rel===0||rel===4||rel===5){let col=pick(r,c1),col2=pick(r,c2);for(let i=0;i<int(r,2,5);i++){builder.beginPart([0,0,0],'connector|joint|'+i);builder.setTexture(recipe.textures[i%2][int(r,0,2)]);let a=[between(r,-.45,-.05),between(r,-.6,.6),between(r,-.5,.5)],b=[between(r,.1,.5),between(r,-.6,.6),between(r,-.5,.5)],rad=between(r,.17,.35);tube(builder,[a,b],[rad,rad*.7],i%2?col:col2,1,7)}}
 }
 function connectorsLifeform(builder,recipe){let r=generator(recipe.seed,'life-connect'),d=recipe.dist,c1=recipe.colors.slice(0,3).map(hex2rgb),c2=recipe.colors.slice(3).map(hex2rgb),n=int(r,7,13);for(let i=0;i<n;i++){let y=between(r,-.85,.85),z=between(r,-.65,.65),start=[-d/2-between(r,-.03,.12),y,z],end=mirrorX(start),b=[-d*.18,y+between(r,-.22,.22),z+between(r,-.18,.18)],c=[d*.18,y+between(r,-.22,.22),z+between(r,-.18,.18)],path=Array.from({length:14},(_,j)=>bezier(start,b,c,end,j/13));builder.beginPart([0,y,z],'life-bridge|'+i);builder.setTexture(recipe.textures[i%2][int(r,0,2)]);if(i%3===0)ribbon(builder,path,between(r,.05,.18),lerp3(pick(r,c1),pick(r,c2),.5),1,between(r,0,6));else{let width=between(r,.03,.12),rad=path.map((p,j)=>width*(.5+.5*Math.sin(j/13*Math.PI)));tube(builder,path.slice(0,8),rad.slice(0,8),pick(r,c1),0,6);tube(builder,path.slice(6),rad.slice(6),pick(r,c2),1,6)}}for(let i=0;i<int(r,3,6);i++){let c=[0,between(r,-.35,.35),between(r,-.3,.3)],arms=int(r,4,8),color=lerp3(c1[int(r,0,2)],c2[int(r,0,2)],.5);builder.beginPart(c,'life-core|'+i);builder.setTexture(recipe.textures[i%2][int(r,0,2)]);for(let a=0;a<arms;a++){let ang=a*Math.PI*2/arms,tip=add(c,[Math.cos(ang)*between(r,.12,.38),Math.sin(ang)*between(r,.08,.32),between(r,-.12,.12)]);tube(builder,[c,tip],[between(r,.014,.05),.002],color,1,4)}}}
-function makeGeometry(recipe){let builder=new Builder(recipe);let N=softwareMode?(recipe.complexity>.74?23:recipe.complexity>.46?21:19):(recipe.complexity>.74?35:recipe.complexity>.46?32:28);for(let side=0;side<2;side++){let shape=buildSDFRecipe(recipe,side),rng=generator(recipe.seed,'mesh'+side),offset=[(side?1:-1)*recipe.dist/2,0,0],colors=recipe.colors.slice(side*3,side*3+3).map(hex2rgb);builder.beginPart(offset,'mass'+side);meshField(builder,shape.sdf,offset,recipe.rotations[side],colors,rng,N,recipe.material[side],recipe,side);if(recipe.profile==='lifeform'){}else extraDetails(builder,recipe,side)}if(recipe.profile==='lifeform'){extraDetailsLifeform(builder,recipe);connectorsLifeform(builder,recipe)}else connectors(builder,recipe);return builder}
+// BIOLOGICAL MORPHOGENESIS ENGINE — coherent axial body plan, not two abstract SDF clusters.
+function lifeMorphology(recipe){
+ const r=generator(recipe.seed,'bio-morphology'),bias=recipe.lifeBias==='auto'?pick(r,['paleo','arthropod','microbe','molecular','membrane']):recipe.lifeBias;
+ const form={paleo:'lobed',arthropod:'segmented',microbe:'ciliate',molecular:'chain',membrane:'fan'}[bias];
+ const segments=int(r,bias==='arthropod'?9:bias==='microbe'?5:bias==='molecular'?5:6,bias==='microbe'?7:bias==='molecular'?8:12);
+ const sizes={paleo:[[1.26,1.56],[.48,.65],[.33,.48]],arthropod:[[1.29,1.63],[.44,.59],[.34,.47]],
+  microbe:[[.90,1.14],[.64,.83],[.42,.58]],molecular:[[1.30,1.62],[.26,.40],[.26,.38]],membrane:[[.99,1.22],[.43,.60],[.29,.44]]};
+ const ranges=sizes[bias]||sizes.paleo;
+ return {bias,form,segments,length:between(r,...ranges[0]),width:between(r,...ranges[1]),depth:between(r,...ranges[2]),
+   lobes:between(r,.13,.27),phase:between(r,0,6.28),bend:between(r,-.10,.10),
+   leftSize:between(r,.95,1.18),rightSize:between(r,.95,1.18),
+   finLength:bias==='membrane'?between(r,1.20,1.65):bias==='microbe'?between(r,.35,.72):bias==='molecular'?between(r,.55,.98):between(r,.78,1.22),
+   finHeight:bias==='membrane'?between(r,.66,1.00):between(r,.24,.47),
+   shell:between(r,.025,.075), tail:between(r,.35,.85), arch:between(r,-.16,.16), symmetry:recipe.symmetry,
+   distortion:1-recipe.symmetry, ambiguity:recipe.ambiguity};
+}
+function lifeWidth(m,y){
+ let t=clamp(y/m.length,-.999,.999);
+ let taper=Math.pow(Math.max(0,1-t*t),.61);
+ return (m.width * taper * (1+.07*Math.cos((t+1)*Math.PI*m.segments + m.phase)) * (1+.11*t));
+}
+function lifeDepth(m,y){let t=clamp(y/m.length,-.999,.999);return m.depth*Math.pow(Math.max(0,1-t*t),.66)*(1+.06*Math.sin(t*11+m.phase))}
+function lifeBodyPosition(m,t,theta){
+ let y=(t*2-1)*m.length;
+ let wx=lifeWidth(m,y),dz=lifeDepth(m,y),rib=.021*Math.sin((t*m.segments)*Math.PI*2+m.phase);
+ let shell=1+(m.form==='ciliate'?rib*.26:m.form==='chain'?rib*.36:rib)/(Math.max(.24,wx));
+ let s=Math.sin(theta),co=Math.cos(theta);
+ let x=wx*shell*co + .06*Math.sin(y*2.7+m.phase)*Math.pow(1-t*t,.75);
+ let z=dz*shell*s + m.bend*Math.sin(y*1.8);
+ if(m.form==='lobed' || m.form==='fan'){z+=.022*Math.sin(theta*5+y*3.8)*Math.sin(Math.PI*t)}
+ if(m.form==='ciliate'){x+=.018*Math.sin(theta*9+y*5.5);z+=.018*Math.cos(theta*8-y*4.8)}
+ return [x,y,z];
+}
+function lifeColor(recipe,p,acc=0){
+ const left=recipe.colors.slice(0,3).map(hex2rgb),right=recipe.colors.slice(3,6).map(hex2rgb);
+ const choose=cols=>{const s=.5+.5*Math.sin(p[1]*3.6+p[2]*2.2+acc*1.6);
+  let t=s<.54?Math.pow(s/.54,1.4):Math.pow((s-.54)/.46,1.2);
+  return s<.54?lerp3(cols[0],cols[1],t):lerp3(cols[1],cols[2],t)};
+ const ca=choose(left),cb=choose(right),mix=clamp((p[0]+.085)/.17,0,1);return lerp3(ca,cb,mix);
+}
+function lifeBody(builder,recipe,m){
+ const rows=softwareMode?38:52,columns=softwareMode?28:44,mat=[.7,.012];
+ builder.beginPart([0,0,0],'mass-life-body');builder.setTexture(4);
+ const vertex=(i,j)=>lifeBodyPosition(m,Math.max(.0003,Math.min(.9997,i/rows)),j/columns*Math.PI*2);
+ const normal=(i,j)=>{let u=sub(vertex(Math.min(rows,i+1),j),vertex(Math.max(0,i-1),j)),v=sub(vertex(i,j+1),vertex(i,j-1));return normalize(cross(u,v))};
+ for(let i=0;i<rows;i++)for(let j=0;j<columns;j++){
+  let a=vertex(i,j),b=vertex(i+1,j),c=vertex(i+1,j+1),d=vertex(i,j+1);
+  let na=normal(i,j),nb=normal(i+1,j),nc=normal(i+1,j+1),nd=normal(i,j+1);
+  builder.tri(a,b,c,p=>lifeColor(recipe,p,.1),mat,na,nb,nc);builder.tri(a,c,d,p=>lifeColor(recipe,p,.1),mat,na,nc,nd);
+ }
+ // The tiny end caps are part of the SAME body part, so respiration does not split the surface.
+ for(let end of [0,rows]){let py=(end?1:-1)*m.length,pole=[0,py,0];for(let j=0;j<columns;j++){
+  let a=vertex(end,j),b=vertex(end,j+1);builder.tri(pole,a,b,p=>lifeColor(recipe,p,.1),mat);
+ }}
+}
+function lifeFin(builder,recipe,m,y,side,index,r){
+ const bias=m.bias,sign=side?1:-1,colors=recipe.colors.slice(side*3,side*3+3).map(hex2rgb);
+ let t=y/m.length,root=lifeWidth(m,y)*.87,rootZ=lifeDepth(m,y)*.43+m.bend*Math.sin(y*1.8);
+ let extent=m.finLength*(.57+.44*(1-t*t))*(side?lerp(m.leftSize,m.rightSize,1-recipe.symmetry):m.leftSize),height=m.finHeight*(.78+.30*r());
+ if(bias==='arthropod')extent*=.72;if(bias==='microbe')extent*=.52;
+ let asym=(1-recipe.symmetry)*.28,distort=side?between(r,-asym,asym):0;
+ let angle=(m.form==='fan'?.18:m.form==='ciliate'?.18:.09)*Math.sin(y*2.1+m.phase);
+ const nU=softwareMode?8:12,nV=softwareMode?7:10,mat=[.55,.018],color=(v,u)=>lerp3(colors[0],lerp3(colors[1],colors[2],u*.8),clamp(.32+.36*v,0,1));
+ const point=(u,v)=>{
+  let envelope=Math.pow(Math.sin(Math.PI*u),.55),h=height*envelope*(bias==='membrane'?1.28:1);
+  let xx=sign*(root+extent*u),yy=y+(v-.5)*2*h + .11*u*Math.sin(y*3+m.phase)+distort*u;
+  let zz=rootZ + .18*Math.sin(Math.PI*u)+.07*Math.sin(8*u+m.phase)*Math.sin(Math.PI*v)+angle*u;
+  // Growth folds the fin, rather than generating floating arbitrary triangles.
+  if(bias==='paleo'||bias==='arthropod')zz+=.10*Math.sin(v*Math.PI*3)*envelope;
+  return [xx,yy,zz];
+ };
+ builder.beginPart([sign*(root+extent*.23),y,rootZ],'life'+(side?'R':'L')+'|fin'+index);builder.setTexture(1);
+ for(let u=0;u<nU;u++)for(let v=0;v<nV;v++){
+  const a=point(u/nU,v/nV),b=point((u+1)/nU,v/nV),c=point((u+1)/nU,(v+1)/nV),d=point(u/nU,(v+1)/nV);
+  let nm=normalize(cross(sub(b,a),sub(d,a)));builder.tri(a,b,c,color(v/nV,u/nU),mat,nm,nm,nm);builder.tri(a,c,d,color(v/nV,u/nU),mat,nm,nm,nm);
+ }
+ // Two exposed marginal veins give the leaf a biological anatomy.
+ const curve=Array.from({length:11},(_,i)=>point(i/10,.47));
+ tube(builder,curve,curve.map((_,i)=>.021*(1-i/11)+.003),colors[1],2,5);
+ if(bias==='paleo'||bias==='arthropod'){
+  for(let k=1;k<4;k++){let base=point(k/5,.5),tip=point(clamp(k/5+.22,0,1),k%2?.82:.18);tube(builder,[base,tip],[.015,.004],colors[2],2,5)}
+ }
+}
+function lifeBead(builder,center,radius,col,key,texture){
+ builder.beginPart(center,key);builder.setTexture(texture);const lat=softwareMode?8:12,lon=softwareMode?10:16,mat=[.33,.07];
+ function pos(i,j){let th=i/lat*Math.PI,ph=j/lon*Math.PI*2;return add(center,[radius*Math.sin(th)*Math.cos(ph),radius*Math.cos(th),radius*Math.sin(th)*Math.sin(ph)])}
+ for(let i=0;i<lat;i++)for(let j=0;j<lon;j++){
+  let a=pos(i,j),b=pos(i+1,j),c=pos(i+1,j+1),d=pos(i,j+1);
+  let na=normalize(sub(a,center)),nb=normalize(sub(b,center)),nc=normalize(sub(c,center)),nd=normalize(sub(d,center));
+  builder.tri(a,b,c,col,mat,na,nb,nc);builder.tri(a,c,d,col,mat,na,nc,nd)
+ }
+}
+function lifeAppendages(builder,recipe,m){
+ const r=generator(recipe.seed,'bio-anatomy'),n=m.bias==='membrane'?4:m.bias==='microbe'?7:m.bias==='molecular'?6:m.segments;
+ // Distinctly biological *paired* appendages: repeating anatomical rows, not random free-space rods.
+ for(let k=0;k<n;k++){
+  const t=(k+.67)/(n+.38),y=(t*2-1)*m.length*.88;
+  for(let side=0;side<2;side++){
+   let cols=recipe.colors.slice(side*3,side*3+3).map(hex2rgb),sgn=side?1:-1;
+   if(m.bias==='molecular'){
+     const nodes=[];let root=lifeWidth(m,y)*.9;
+     for(let a=0;a<3;a++){
+      let x=sgn*(root+.22+a*.18),by=y+(a-1)*.13,z=lifeDepth(m,y)*.46+Math.sin(a*2+k)*.11;
+      nodes.push([x,by,z]);
+     }
+     builder.beginPart(nodes[1],'life'+(side?'R':'L')+'|bond'+k);builder.setTexture(4);tube(builder,nodes,[.044,.034,.02],cols[1],1,7);
+     for(let a=0;a<3;a++)lifeBead(builder,nodes[a],.082+(a===1?.035:0),cols[(a+k)%3],'life'+(side?'R':'L')+'|bead'+k+'-'+a,8);
+   }else{
+     lifeFin(builder,recipe,m,y,side,k,generator(recipe.seed,'bio-fin-pair|'+k));
+   }
+  }
+ }
+ // Delicate paired flagella/antennae and rear filament, never a literal eye or mouth.
+ let feelerCount=m.bias==='microbe'?11:m.bias==='arthropod'?6:4;
+ for(let i=0;i<feelerCount;i++){
+  let y=between(r,-m.length*.89,m.length*.89),base=lifeWidth(m,y),z=lifeDepth(m,y)*.63;
+  let length=between(r,.37,.65),dy1=between(r,-.17,.17),dy2=between(r,-.24,.24),dz2=between(r,-.09,.30);
+  for(let side=0;side<2;side++){
+   let sg=side?1:-1,cols=recipe.colors.slice(side*3,side*3+3).map(hex2rgb);
+   let pos=[sg*base*.96,y,z],mid=[sg*(base+.22),y+dy1,z+.12],tip=[sg*(base+length),y+dy2,z+dz2];
+   builder.beginPart(mid,'life'+(side?'R':'L')+'|cilia'+i);builder.setTexture(2);
+   tube(builder,[pos,mid,tip],[.025,.015,.002],cols[2],1,5);
+  }
+ }
+ if(m.bias==='arthropod'||m.bias==='paleo'){
+  for(let side=0;side<2;side++){
+   let sg=side?1:-1,colors=recipe.colors.slice(side*3,side*3+3).map(hex2rgb);
+   const root=[sg*.17,m.length*.94,.07],stem=[sg*.33,m.length+between(r,.1,.22),.12],tip=[sg*between(r,.55,.89),m.length+between(r,.38,.68),.19];
+   builder.beginPart(stem,'life'+(side?'R':'L')+'|antenna');builder.setTexture(2);tube(builder,[root,stem,tip],[.052,.024,.003],colors[1],1,6);
+  }
+ }
+}
+function lifeSegments(builder,recipe,m){
+ const r=generator(recipe.seed,'bio-segments');
+ const bandColors=[hex2rgb(recipe.colors[1]),hex2rgb(recipe.colors[4])];
+ // Transverse arc ridges register as metameric body segments, sharing one body deformation.
+ // Shared transform with the body: surface ridges never tear away during respiration.
+ builder.setTexture(4);
+ const n=m.segments;
+ for(let i=1;i<n;i++){
+  let y=(i/n*2-1)*m.length*.96,wx=lifeWidth(m,y),dz=lifeDepth(m,y);
+  let path=[];for(let j=0;j<=18;j++){
+    let a=.12+j/18*(Math.PI-.24);path.push([wx*1.04*Math.cos(a),y+.018*Math.sin(a*3+m.phase),dz*1.045*Math.sin(a)+m.bend*Math.sin(y*1.8)]);
+  }
+  let thick=m.bias==='arthropod'?.028:m.bias==='microbe'?.007:m.bias==='molecular'?.009:.016;tube(builder,path,path.map((_,j)=>thick*(.8+.2*Math.sin(j/18*Math.PI))),i%2?bandColors[0]:bandColors[1],2,5);
+ }
+ // Median raised nervous cord, read as vein or axis rather than prescribed 'face'.
+ let line=Array.from({length:21},(_,i)=>{let y=(i/20*2-1)*m.length*.84;return [.02*Math.sin(y*3),y,lifeDepth(m,y)*1.025+m.bend*Math.sin(y*1.8)]});
+ tube(builder,line,line.map((_,i)=>.022+.012*Math.sin(i/20*Math.PI)),bandColors[0],2,5);
+ // Unpaired cell clusters, located ON the body rather than scattered in space.
+ if(m.bias==='microbe'||m.bias==='molecular'){
+  let centers=[-m.length*.38,-m.length*.05,m.length*.28];
+  for(let i=0;i<centers.length;i++){
+   let y=centers[i],z=lifeDepth(m,y)*.95+.08;
+   lifeBead(builder,[0,y,z],.088+(i===1?.045:0),i%2?bandColors[1]:bandColors[0],'life-nucleus-'+i,8);
+  }
+ }
+}
+function makeLifeformGeometry(recipe){
+ const builder=new Builder(recipe),m=lifeMorphology(recipe);recipe.biotype=m.bias;
+ lifeBody(builder,recipe,m);lifeSegments(builder,recipe,m);lifeAppendages(builder,recipe,m);
+ recipe.csg=[0,0];return builder;
+}
+function makeGeometry(recipe){
+ if(recipe.profile==='lifeform')return makeLifeformGeometry(recipe);
+ let builder=new Builder(recipe);let N=softwareMode?(recipe.complexity>.74?23:recipe.complexity>.46?21:19):(recipe.complexity>.74?35:recipe.complexity>.46?32:28);
+ for(let side=0;side<2;side++){
+  let shape=buildSDFRecipe(recipe,side),rng=generator(recipe.seed,'mesh'+side),offset=[(side?1:-1)*recipe.dist/2,0,0],colors=recipe.colors.slice(side*3,side*3+3).map(hex2rgb);
+  builder.beginPart(offset,'mass'+side);meshField(builder,shape.sdf,offset,recipe.rotations[side],colors,rng,N,recipe.material[side],recipe,side);extraDetails(builder,recipe,side)
+ }connectors(builder,recipe);return builder
+}
 const vs=`
 precision highp float;
 attribute vec3 aPos;attribute vec3 aNormal;attribute vec3 aColor;attribute float aRough;attribute float aGlow;attribute float aPart;attribute float aTexture;
@@ -554,9 +725,9 @@ function frame(stamp){requestAnimationFrame(frame);let dt=lastTick?Math.min(.06,
  for(let [name,size,offset] of [['aPos',3,0],['aNormal',3,3],['aColor',3,6],['aRough',1,9],['aGlow',1,10],['aPart',1,11],['aTexture',1,12]]){let loc=attrs[name];if(loc>=0)gl.vertexAttribPointer(loc,size,gl.FLOAT,false,13*4,offset*4)}gl.drawArrays(gl.TRIANGLES,0,mesh.count)
 }
 
-function updateStats(r,b){$('modeL').textContent=NAMES[r.modes[0]];$('modeR').textContent=NAMES[r.modes[1]];$('relationship').textContent=(r.relationLabels||RELATIONSHIPS)[r.relation];$('fusionStat').textContent=Math.round(r.fusion*100)+'% / '+r.dist.toFixed(2);$('boolStat').textContent=`加算 + / 減算 ${r.csg[0]+r.csg[1]}箇所`;$('triangles').textContent=b.triangles.toLocaleString('ja-JP');$('frameSeed').textContent=r.seed;$('frameMeta').textContent=(r.profile==='lifeform'?'味覚生命体 · ':'')+(r.bodyPlan||NAMES[r.modes[0]]+' × '+NAMES[r.modes[1]]);$('keywordTags').innerHTML=[...(r.bodyPlan?[r.bodyPlan]:[]),...r.keywords].map(w=>'<span class="tagword">'+w+'</span>').join('');$('motionCount').textContent=b.partMotions.length+'パーツ / 複合運動';$('motionInfo').textContent='質感：'+r.textures.map((ts,i)=>(i?'右':'左')+ts.map(t=>TEXTURES[t]).join('・')).join(' ／ ')+'。動き：'+b.partMotions.slice(0,4).map(m=>MOTIONS[m[0]]+'×'+MOTIONS[m[1]]).join('、')}
+function updateStats(r,b){$('modeL').textContent=r.profile==='lifeform'?'共通の分節胴体':NAMES[r.modes[0]];$('modeR').textContent=r.profile==='lifeform'?'左右対称の器官':NAMES[r.modes[1]];$('relationship').textContent=r.profile==='lifeform'?'生体の正中軸':(r.relationLabels||RELATIONSHIPS)[r.relation];$('fusionStat').textContent=r.profile==='lifeform'?Math.round(r.symmetry*100)+'% 対称 / '+Math.round(r.ambiguity*100)+'% 曖昧':Math.round(r.fusion*100)+'% / '+r.dist.toFixed(2);$('boolStat').textContent=r.profile==='lifeform'?'一体胴体＋付属器官':`加算 + / 減算 ${r.csg[0]+r.csg[1]}箇所`;$('triangles').textContent=b.triangles.toLocaleString('ja-JP');$('frameSeed').textContent=r.seed;$('frameMeta').textContent=(r.profile==='lifeform'?'味覚生命体 · ':'')+(r.bodyPlan||NAMES[r.modes[0]]+' × '+NAMES[r.modes[1]]);$('keywordTags').innerHTML=[...(r.bodyPlan?[r.bodyPlan]:[]),...r.keywords].map(w=>'<span class="tagword">'+w+'</span>').join('');$('motionCount').textContent=b.partMotions.length+'パーツ / 複合運動';$('motionInfo').textContent='質感：'+r.textures.map((ts,i)=>(i?'右':'左')+ts.map(t=>TEXTURES[t]).join('・')).join(' ／ ')+'。動き：'+b.partMotions.slice(0,4).map(m=>MOTIONS[m[0]]+'×'+MOTIONS[m[1]]).join('、')}
 function toast(message){let t=$('toast');t.textContent=message;t.classList.add('show');clearTimeout(t._tm);t._tm=setTimeout(()=>t.classList.remove('show'),2300)}
-async function generate(seed){if(generating)return;generating=true;$('loading').classList.add('active');$('generate').disabled=true;$('same').disabled=true;$('seed').value=seed;await new Promise(done=>setTimeout(done,25));try{let sameSeed=current&&current.seed===seed;if(!sameSeed)partRotationEnabled=new Map();let r=makeRecipe(seed);let b=makeGeometry(r);current=r;upload(b);motionClock=0;prevFrameKey='';syncPalette(r);updateStats(r,b);setBackground(r.background);rotation={yaw:between(generator(seed,'camera'),-.7,.7),pitch:between(generator(seed,'cameraPitch'),-.3,.32)};initialRotation={...rotation};zoom=Math.max(6.7,r.dist*1.8+3.25);try{let u=new URL(location.href);u.searchParams.set('seed',seed);history.replaceState({},'',u)}catch(e){};toast(r.profile==='lifeform'?'新しい味覚生命体を生成しました':'新しい味覚構造体を生成しました')}catch(err){console.error(err);toast('生成エラー：'+err.message)}finally{generating=false;$('loading').classList.remove('active');$('generate').disabled=false;$('same').disabled=false}}
+async function generate(seed){if(generating)return;generating=true;$('loading').classList.add('active');$('generate').disabled=true;$('same').disabled=true;$('seed').value=seed;await new Promise(done=>setTimeout(done,25));try{let sameSeed=current&&current.seed===seed;if(!sameSeed)partRotationEnabled=new Map();let r=makeRecipe(seed);let b=makeGeometry(r);current=r;upload(b);motionClock=0;prevFrameKey='';syncPalette(r);updateStats(r,b);setBackground(r.background);rotation=r.profile==='lifeform'?{yaw:between(generator(seed,'camera'),-.12,.12),pitch:between(generator(seed,'cameraPitch'),-.11,.11)}:{yaw:between(generator(seed,'camera'),-.7,.7),pitch:between(generator(seed,'cameraPitch'),-.3,.32)};initialRotation={...rotation};zoom=r.profile==='lifeform'?7.1:Math.max(6.7,r.dist*1.8+3.25);try{let u=new URL(location.href);u.searchParams.set('seed',seed);u.searchParams.set('mode',r.profile);for(let [name,value] of [['bias',r.lifeBias],['sym',Math.round(r.symmetry*100)],['amb',Math.round(r.ambiguity*100)],['theme',r.theme],['preset',motionPreset],['gradient',$('gradient').value]])u.searchParams.set(name,value);history.replaceState({},'',u)}catch(e){};toast(r.profile==='lifeform'?'新しい味覚生命体を生成しました':'新しい味覚構造体を生成しました')}catch(err){console.error(err);toast('生成エラー：'+err.message)}finally{generating=false;$('loading').classList.remove('active');$('generate').disabled=false;$('same').disabled=false}}
 function download(blob,name){let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
 function savePNG(){
  if(!mesh || !current)return;
@@ -574,7 +745,7 @@ function savePNG(){
  ctx.drawImage(source,0,0);
  out.toBlob(b=>{if(b)download(b,'flavor-structure-'+current.seed+'-'+scale+'x.png');else toast('PNGを保存できませんでした')},'image/png');
 }
-function saveJSON(){if(!current)return;const payload={app:'Flavor Structure Lab prototype 1.3, smooth-shaded canvas renderer with bilateral lifeform mode',created:new Date().toISOString(),palette:palette,recipe:current,animation:{clock:motionClock,playing:isPlaying,speed:motionSpeed,amplitude:motionAmplitude,rotationPower,ikPower,motionPreset,partRotationEnabled:Object.fromEntries(partRotationEnabled),textureStrength:textureLevel,shadingEnabled,shadingStrength,flatTextureOff,exportScale:parseInt($('exportScale')?.value||'2',10)}};download(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'flavor-structure-'+current.seed+'.json')}
+function saveJSON(){if(!current)return;const payload={app:'Flavor Structure Lab prototype 1.4, smooth-shaded canvas renderer with bilateral lifeform mode',created:new Date().toISOString(),palette:palette,recipe:current,animation:{clock:motionClock,playing:isPlaying,speed:motionSpeed,amplitude:motionAmplitude,rotationPower,ikPower,motionPreset,partRotationEnabled:Object.fromEntries(partRotationEnabled),textureStrength:textureLevel,shadingEnabled,shadingStrength,flatTextureOff,exportScale:parseInt($('exportScale')?.value||'2',10)}};download(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'flavor-structure-'+current.seed+'.json')}
 function syncUiLabels(){let labels={auto:'自動',paleo:'古生物 / カンブリア',molecular:'高分子 / 分子模型',microbe:'細胞 / 微生物',arthropod:'節足 / 殻 / 触手',membrane:'膜 / 葉状 / ローブ'};$('lifeBiasValue').textContent=labels[$('lifeBias').value]||'自動';$('symmetryValue').textContent=$('symmetry').value+'%';$('ambiguityValue').textContent=$('ambiguity').value+'%';$('exportScaleValue').textContent=$('exportScale').value+'×';}
 function applyLifePreset(name,regenNew=false){let conf=LIFE_PRESET_CONFIG[name];if(!conf)return;$('profile').value='lifeform';$('lifeBias').value=conf.lifeBias;$('symmetry').value=conf.symmetry;$('ambiguity').value=conf.ambiguity;$('theme').value=conf.theme;$('motionPreset').value=conf.motionPreset;motionPreset=conf.motionPreset;$('exportScale').value=String(conf.exportScale||2);shadingEnabled=conf.shading!==false;$('shading').checked=shadingEnabled;flatTextureOff=!!conf.flatTextureOff;$('flatTextureOff').checked=flatTextureOff;syncUiLabels();if(mesh)applyMotionControls();let seed=regenNew?newSeed():($('seed').value.trim()||newSeed());generate(seed);toast(conf.label+' を適用しました')}
 function renderSaved(){let list=$('savedList');$('savedCount').textContent=saved.length+'件';list.innerHTML='';saved.forEach((item,i)=>{let line=document.createElement('div');line.style='display:flex;align-items:center;gap:7px;border:1px solid #303d48;border-radius:8px;padding:5px;';let b=document.createElement('button');b.className='btn compact';b.style='flex:1;text-align:left';b.textContent=item.seed+' · '+item.colors.slice(0,3).join(' ');b.title='再現';b.onclick=()=>generate(item.seed);let d=document.createElement('button');d.className='btn compact';d.textContent='×';d.title='削除';d.onclick=()=>{saved.splice(i,1);persist()};line.append(b,d);list.append(line)})}
@@ -588,8 +759,8 @@ function wire(){
  for(let [id,show,action] of [['motionSpeed','motionSpeedValue',v=>motionSpeed=v/100],['motionAmount','motionAmountValue',v=>motionAmplitude=v/100],['rotationPower','rotationPowerValue',v=>rotationPower=v/100],['ikPower','ikPowerValue',v=>ikPower=v/100],['surface','surfaceValue',v=>textureLevel=v/100],['shadingStrength','shadingStrengthValue',v=>shadingStrength=v/100],['gradient','gradientValue',v=>{}]]){
   $(id).oninput=()=>{let val=Number($(id).value);$(show).textContent=val+'%';action(val);prevFrameKey=''};
  }
- $('symmetry').oninput=()=>{syncUiLabels();if(current&&$('profile').value==='lifeform')generate(current.seed)};
- $('ambiguity').oninput=()=>{syncUiLabels();if(current&&$('profile').value==='lifeform')generate(current.seed)};
+ $('symmetry').oninput=syncUiLabels;$('symmetry').onchange=()=>{if(current&&$('profile').value==='lifeform')generate(current.seed)};
+ $('ambiguity').oninput=syncUiLabels;$('ambiguity').onchange=()=>{if(current&&$('profile').value==='lifeform')generate(current.seed)};
  $('motionPreset').onchange=()=>{motionPreset=$('motionPreset').value;applyMotionControls();toast('運動プリセットを切り替えました')};
  $('exportScale').onchange=()=>{syncUiLabels()};
  $('lifeBias').onchange=()=>{syncUiLabels();if(current&&$('profile').value==='lifeform')generate(current.seed)};
@@ -604,10 +775,10 @@ function wire(){
  syncUiLabels();
 
  $('bookmark').onclick=()=>{if(!current)return;if(saved.some(s=>s.seed===current.seed)){toast('すでに保存されています');return}saved.unshift({seed:current.seed,colors:current.colors.slice(),rows:current.rows.slice()});saved=saved.slice(0,40);persist();toast('お気に入りに追加しました')};
- $('copyLink').onclick=async()=>{let url=location.href.split('?')[0]+'?seed='+encodeURIComponent(current.seed);try{await navigator.clipboard.writeText(url);toast('再現用リンクをコピーしました')}catch(e){prompt('このURLをコピーしてください',url)}};
+ $('copyLink').onclick=async()=>{if(!current)return;let url=location.href;try{await navigator.clipboard.writeText(url);toast('再現用リンクをコピーしました')}catch(e){prompt('このURLをコピーしてください',url)}};
  $('override').onchange=()=>{let on=$('override').checked;for(let id of ['fusion','complexity'])$(id).disabled=!on;$('fusionValue').textContent=on?$('fusion').value+'%':'ランダム';$('complexityValue').textContent=on?$('complexity').value+'%':'ランダム'};
  for(let id of ['fusion','complexity'])$(id).oninput=()=>$(id+'Value').textContent=$(id).value+'%';
- $('resetView').onclick=()=>{rotation={...initialRotation};zoom=Math.max(6.7,(current?.dist||2.5)*1.8+3.25)};$('autoRotate').onclick=()=>{auto=!auto;$('autoRotate').textContent='自動回転 '+(auto?'ON':'OFF');$('autoRotate').setAttribute('aria-pressed',auto?'true':'false')};
+ $('resetView').onclick=()=>{rotation={...initialRotation};zoom=current?.profile==='lifeform'?7.1:Math.max(6.7,(current?.dist||2.5)*1.8+3.25)};$('autoRotate').onclick=()=>{auto=!auto;$('autoRotate').textContent='自動回転 '+(auto?'ON':'OFF');$('autoRotate').setAttribute('aria-pressed',auto?'true':'false')};
  let cv=$('glview'),pointers=new Map(),lastDist=0;
  cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY})});
  cv.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId))return;let prev=pointers.get(e.pointerId),dx=e.clientX-prev.x,dy=e.clientY-prev.y;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===1){rotation.yaw+=dx*.007;rotation.pitch=clamp(rotation.pitch+dy*.007,-1.5,1.5)}else if(pointers.size===2){let arr=[...pointers.values()],dist=Math.hypot(arr[0].x-arr[1].x,arr[0].y-arr[1].y);if(lastDist)zoom=clamp(zoom*lastDist/dist,3.5,28);lastDist=dist}});
@@ -615,6 +786,12 @@ function wire(){
  cv.addEventListener('wheel',e=>{e.preventDefault();zoom=clamp(zoom*Math.exp(e.deltaY*.001),3.4,30)},{passive:false});
  $('upload').onchange=ev=>{let f=ev.target.files?.[0];if(!f)return;let img=new Image(),url=URL.createObjectURL(f);img.onload=()=>{let maxRows=Math.min(100,Math.max(2,img.height)),cols=6,can=document.createElement('canvas');can.width=cols;can.height=maxRows;let cx=can.getContext('2d',{willReadFrequently:true});cx.drawImage(img,0,0,cols,maxRows);let pix=cx.getImageData(0,0,cols,maxRows).data;palette=Array.from({length:maxRows},(_,y)=>Array.from({length:cols},(_,x)=>{let t=4*(y*cols+x);return '#'+[pix[t],pix[t+1],pix[t+2]].map(v=>v.toString(16).padStart(2,'0')).join('').toUpperCase()}));paletteDisplay();generate(newSeed());URL.revokeObjectURL(url);toast('新しいパレットを読み込みました')};img.onerror=()=>{toast('画像を読み込めませんでした');URL.revokeObjectURL(url)};img.src=url};
 }
-try{setupGL();paletteDisplay();renderSaved();wire();const qs=new URLSearchParams(location.search);generate(qs.get('seed')||newSeed())}catch(e){console.error(e)}
+try{setupGL();paletteDisplay();renderSaved();wire();const qs=new URLSearchParams(location.search);
+ $('profile').value=qs.get('mode')==='structure'?'structure':'lifeform';
+ if($('profile').value==='lifeform'){motionPreset='life-breathe';$('motionPreset').value='life-breathe'}
+ const b=qs.get('bias');if(b&&[...$('lifeBias').options].some(o=>o.value===b))$('lifeBias').value=b;
+ for(let [id,param] of [['symmetry','sym'],['ambiguity','amb'],['gradient','gradient']]){let n=Number(qs.get(param));if(qs.has(param)&&Number.isFinite(n))$(id).value=String(clamp(n,Number($(id).min),Number($(id).max)))}
+ for(let [id,param] of [['theme','theme'],['motionPreset','preset']]){let v=qs.get(param);if(v&&[...$(id).options].some(o=>o.value===v))$(id).value=v}
+ motionPreset=$('motionPreset').value;syncUiLabels();generate(qs.get('seed')||newSeed())}catch(e){console.error(e)}
 </script>
 </body></html>
