@@ -28,7 +28,7 @@ aside{z-index:3;overflow-y:auto;background:var(--panel);border-right:1px solid v
 <body>
 <div class="app">
 <aside><div class="side-inner">
- <div class="logo"><div class="logo-symbol">◈</div><div><div class="pre">GENERATIVE TASTE ARCHITECTURE · v0.7</div><h1>FLAVOR STRUCTURE LAB <span style="color:#93a7ae;font-size:10px;font-weight:600">β</span></h1></div></div>
+ <div class="logo"><div class="logo-symbol">◈</div><div><div class="pre">GENERATIVE TASTE ARCHITECTURE · v0.8</div><h1>FLAVOR STRUCTURE LAB <span style="color:#93a7ae;font-size:10px;font-weight:600">β</span></h1></div></div>
  <div class="eyebrow">01 / GENERATION</div>
  <div class="heading"><b>シードから生成</b><span class="mini">再現可能</span></div>
  <div class="field"><input id="seed" type="text" inputmode="numeric" spellcheck="false" aria-label="シード番号" maxlength="40" placeholder="シードを入力"><button class="btn compact" id="same" title="同じシードで再生成">再現</button></div>
@@ -87,7 +87,7 @@ aside{z-index:3;overflow-y:auto;background:var(--panel);border-right:1px solid v
  <div class="button-grid"><button class="btn" id="savePng">画像 PNG</button><button class="btn" id="saveJson">設定 JSON</button><button class="btn" id="bookmark">☆ お気に入り</button><button class="btn" id="copyLink">再現リンク</button></div>
  <div class="heading"><b>お気に入りのシード</b><span class="mini" id="savedCount">0件</span></div>
  <div id="savedList" style="display:grid;gap:6px"></div>
- <p class="footer">v0.7：独立運動・局所回転・グラデーション・面別質感・陰影制御・フラット表示。完全オフライン動作・外部ライブラリ不要。実際の3Dメッシュを生成し、加算・減算を符号付き距離場（SDF）で計算する試作版です。造形の品質向上と高度なメッシュ書き出しは今後の拡張対象です。</p>
+ <p class="footer">v0.8：Canvas描画のポリゴン間引きを廃止・一体面を維持。局所回転・陰影・フラット表示対応。完全オフライン動作・外部ライブラリ不要。実際の3Dメッシュを生成し、加算・減算を符号付き距離場（SDF）で計算する試作版です。造形の品質向上と高度なメッシュ書き出しは今後の拡張対象です。</p>
 </div></aside>
 <main class="viewer" id="viewer">
  <canvas id="glview" aria-label="ドラッグで回転できる3D構造体"></canvas>
@@ -271,7 +271,7 @@ function connectors(builder,recipe){let r=generator(recipe.seed,'connectors'),d=
  }
  if(rel===0||rel===4||rel===5){let col=pick(r,c1),col2=pick(r,c2);for(let i=0;i<int(r,2,5);i++){builder.beginPart([0,0,0],'connector|joint|'+i);builder.setTexture(recipe.textures[i%2][int(r,0,2)]);let a=[between(r,-.45,-.05),between(r,-.6,.6),between(r,-.5,.5)],b=[between(r,.1,.5),between(r,-.6,.6),between(r,-.5,.5)],rad=between(r,.17,.35);tube(builder,[a,b],[rad,rad*.7],i%2?col:col2,1,7)}}
 }
-function makeGeometry(recipe){let builder=new Builder(recipe);let N=recipe.complexity>.74?35:recipe.complexity>.46?32:28;for(let side=0;side<2;side++){let shape=buildSDFRecipe(recipe,side),rng=generator(recipe.seed,'mesh'+side),offset=[(side?1:-1)*recipe.dist/2,0,0],colors=recipe.colors.slice(side*3,side*3+3).map(hex2rgb);builder.beginPart(offset,'mass'+side);meshField(builder,shape.sdf,offset,recipe.rotations[side],colors,rng,N,recipe.material[side],recipe,side);extraDetails(builder,recipe,side)}connectors(builder,recipe);return builder}
+function makeGeometry(recipe){let builder=new Builder(recipe);let N=softwareMode?(recipe.complexity>.74?23:recipe.complexity>.46?21:19):(recipe.complexity>.74?35:recipe.complexity>.46?32:28);for(let side=0;side<2;side++){let shape=buildSDFRecipe(recipe,side),rng=generator(recipe.seed,'mesh'+side),offset=[(side?1:-1)*recipe.dist/2,0,0],colors=recipe.colors.slice(side*3,side*3+3).map(hex2rgb);builder.beginPart(offset,'mass'+side);meshField(builder,shape.sdf,offset,recipe.rotations[side],colors,rng,N,recipe.material[side],recipe,side);extraDetails(builder,recipe,side)}connectors(builder,recipe);return builder}
 const vs=`
 precision highp float;
 attribute vec3 aPos;attribute vec3 aNormal;attribute vec3 aColor;attribute float aRough;attribute float aGlow;attribute float aPart;attribute float aTexture;
@@ -423,9 +423,16 @@ function cpuMove(p,part,t){let idx=Math.min(PART_LIMIT-1,part),m=mesh.motions,pv
  }
  return [q[0]+pv[k],q[1]+pv[k+1],q[2]+pv[k+2]]}
 function drawSoftware(w,h){let cx=ctx2d,a=mesh.data,aspect=w/h,yaw=rotation.yaw,pitch=rotation.pitch;
- cx.clearRect(0,0,w,h);let eye=[Math.cos(pitch)*Math.sin(yaw),Math.sin(pitch),Math.cos(pitch)*Math.cos(yaw)],right=[Math.cos(yaw),0,-Math.sin(yaw)],up=normalize(cross(eye,right));let f=.5*h/Math.tan(.70/2),zz=zoom*(aspect<1?.95:1),tri=[],limit=isPlaying?5500:12000,stride=Math.ceil(mesh.tris/limit),lx=-.56,ly=.92,lz=.68;
- for(let k=0;k<mesh.tris;k+=stride){let pts=[],depth=0,visible=true;for(let v=0;v<3;v++){let o=(k*3+v)*13,x=a[o],y=a[o+1],z=a[o+2],p=cpuMove([x,y,z],a[o+11],motionClock),vx=dot(p,right),vy=dot(p,up),vz=dot(p,eye),dist=zz-vz;if(dist<.2){visible=false;break}let sc=f/dist;pts.push([w*.5+vx*sc,h*.5-vy*sc]);depth+=vz}if(!visible)continue;let u=k*39,nx=a[u+3],ny=a[u+4],nz=a[u+5],rough=a[u+9],tex=a[u+12],light=clamp(.36+Math.max(0,nx*lx+ny*ly+nz*lz)*.69,.25,1.1),jitter=(Math.sin(k*79+tex*21)*.5+.5-.5)*textureLevel*.26,cleanFlat=!shadingEnabled&&flatTextureOff,rgb=[0,1,2].map(c=>{let avg=(a[u+6+c]+a[u+19+c]+a[u+32+c])/3;if(cleanFlat)return Math.round(255*clamp(avg,0,1));let lit=shadingEnabled?Math.max(0,1+(light-1)*shadingStrength):1;let val=shadingEnabled?clamp(avg*(lit+jitter)+.03,0,1):clamp(avg*(1+jitter*.7),0,1);return Math.round(255*Math.pow(val,.86))});tri.push({pts,depth:depth/3,fill:'rgb('+rgb.join(',')+')'})}
- tri.sort((a,b)=>a.depth-b.depth);for(let t of tri){cx.fillStyle=t.fill;cx.beginPath();cx.moveTo(t.pts[0][0],t.pts[0][1]);cx.lineTo(t.pts[1][0],t.pts[1][1]);cx.lineTo(t.pts[2][0],t.pts[2][1]);cx.closePath();cx.fill()}
+ cx.clearRect(0,0,w,h);let eye=[Math.cos(pitch)*Math.sin(yaw),Math.sin(pitch),Math.cos(pitch)*Math.cos(yaw)],right=[Math.cos(yaw),0,-Math.sin(yaw)],up=normalize(cross(eye,right));let f=.5*h/Math.tan(.70/2),zz=zoom*(aspect<1?.95:1),tri=[],lx=-.56,ly=.92,lz=.68;
+ for(let k=0;k<mesh.tris;k++){let pts=[],depth=0,visible=true;for(let v=0;v<3;v++){let o=(k*3+v)*13,x=a[o],y=a[o+1],z=a[o+2],p=cpuMove([x,y,z],a[o+11],motionClock),vx=dot(p,right),vy=dot(p,up),vz=dot(p,eye),dist=zz-vz;if(dist<.2){visible=false;break}let sc=f/dist;pts.push([w*.5+vx*sc,h*.5-vy*sc]);depth+=vz}if(!visible)continue;let u=k*39,nx=a[u+3],ny=a[u+4],nz=a[u+5],rough=a[u+9],tex=a[u+12],light=clamp(.36+Math.max(0,nx*lx+ny*ly+nz*lz)*.69,.25,1.1),jitter=(Math.sin(k*79+tex*21)*.5+.5-.5)*textureLevel*.26,cleanFlat=!shadingEnabled&&flatTextureOff,rgb=[0,1,2].map(c=>{let avg=(a[u+6+c]+a[u+19+c]+a[u+32+c])/3;if(cleanFlat)return Math.round(255*clamp(avg,0,1));let lit=shadingEnabled?Math.max(0,1+(light-1)*shadingStrength):1;let val=shadingEnabled?clamp(avg*(lit+jitter)+.03,0,1):clamp(avg*(1+jitter*.7),0,1);return Math.round(255*Math.pow(val,.86))});tri.push({pts,depth:depth/3,fill:'rgb('+rgb.join(',')+')'})}
+ tri.sort((a,b)=>a.depth-b.depth);
+ // A tiny shared-edge overdraw prevents Canvas anti-aliasing from revealing hairline cracks.
+ // All triangles are retained; this is not a geometry decimation shortcut.
+ for(let t of tri){
+  let v=t.pts, cx0=(v[0][0]+v[1][0]+v[2][0])/3,cy0=(v[0][1]+v[1][1]+v[2][1])/3;
+  let p=v.map(a=>{let dx=a[0]-cx0,dy=a[1]-cy0,len=Math.hypot(dx,dy)||1;return [a[0]+dx/len*.35,a[1]+dy/len*.35]});
+  cx.fillStyle=t.fill;cx.beginPath();cx.moveTo(p[0][0],p[0][1]);cx.lineTo(p[1][0],p[1][1]);cx.lineTo(p[2][0],p[2][1]);cx.closePath();cx.fill();
+ }
 }
 function frame(stamp){requestAnimationFrame(frame);let dt=lastTick?Math.min(.06,(stamp-lastTick)/1000):0;lastTick=stamp;if(isPlaying&&mesh)motionClock+=dt*motionSpeed;
  let canvas=$('glview'),dpr=Math.min(window.devicePixelRatio||1,window.innerWidth<801?1.4:2),w=Math.max(1,Math.round(canvas.clientWidth*dpr)),h=Math.max(1,Math.round(canvas.clientHeight*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;if(gl)gl.viewport(0,0,w,h);prevFrameKey=''}if(auto)rotation.yaw+=.0035;
