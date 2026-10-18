@@ -28,7 +28,7 @@ aside{z-index:3;overflow-y:auto;background:var(--panel);border-right:1px solid v
 <body>
 <div class="app">
 <aside><div class="side-inner">
- <div class="logo"><div class="logo-symbol">◈</div><div><div class="pre">GENERATIVE TASTE ARCHITECTURE · v0.5</div><h1>FLAVOR STRUCTURE LAB <span style="color:#93a7ae;font-size:10px;font-weight:600">β</span></h1></div></div>
+ <div class="logo"><div class="logo-symbol">◈</div><div><div class="pre">GENERATIVE TASTE ARCHITECTURE · v0.7</div><h1>FLAVOR STRUCTURE LAB <span style="color:#93a7ae;font-size:10px;font-weight:600">β</span></h1></div></div>
  <div class="eyebrow">01 / GENERATION</div>
  <div class="heading"><b>シードから生成</b><span class="mini">再現可能</span></div>
  <div class="field"><input id="seed" type="text" inputmode="numeric" spellcheck="false" aria-label="シード番号" maxlength="40" placeholder="シードを入力"><button class="btn compact" id="same" title="同じシードで再生成">再現</button></div>
@@ -87,7 +87,7 @@ aside{z-index:3;overflow-y:auto;background:var(--panel);border-right:1px solid v
  <div class="button-grid"><button class="btn" id="savePng">画像 PNG</button><button class="btn" id="saveJson">設定 JSON</button><button class="btn" id="bookmark">☆ お気に入り</button><button class="btn" id="copyLink">再現リンク</button></div>
  <div class="heading"><b>お気に入りのシード</b><span class="mini" id="savedCount">0件</span></div>
  <div id="savedList" style="display:grid;gap:6px"></div>
- <p class="footer">v0.2：独立運動・グラデーション・面別質感・造形系統拡張。完全オフライン動作・外部ライブラリ不要。実際の3Dメッシュを生成し、加算・減算を符号付き距離場（SDF）で計算する試作版です。造形の品質向上と高度なメッシュ書き出しは今後の拡張対象です。</p>
+ <p class="footer">v0.7：独立運動・局所回転・グラデーション・面別質感・陰影制御・フラット表示。完全オフライン動作・外部ライブラリ不要。実際の3Dメッシュを生成し、加算・減算を符号付き距離場（SDF）で計算する試作版です。造形の品質向上と高度なメッシュ書き出しは今後の拡張対象です。</p>
 </div></aside>
 <main class="viewer" id="viewer">
  <canvas id="glview" aria-label="ドラッグで回転できる3D構造体"></canvas>
