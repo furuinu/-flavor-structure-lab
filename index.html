@@ -28,12 +28,20 @@ aside{z-index:3;overflow-y:auto;background:var(--panel);border-right:1px solid v
 <body>
 <div class="app">
 <aside><div class="side-inner">
- <div class="logo"><div class="logo-symbol">◈</div><div><div class="pre">GENERATIVE TASTE ARCHITECTURE · v0.9</div><h1>FLAVOR STRUCTURE LAB <span style="color:#93a7ae;font-size:10px;font-weight:600">β</span></h1></div></div>
+ <div class="logo"><div class="logo-symbol">◈</div><div><div class="pre">GENERATIVE TASTE ARCHITECTURE · v1.3</div><h1>FLAVOR STRUCTURE LAB <span style="color:#93a7ae;font-size:10px;font-weight:600">β</span></h1></div></div>
  <div class="eyebrow">01 / GENERATION</div>
  <div class="heading"><b>シードから生成</b><span class="mini">再現可能</span></div>
  <div class="field"><input id="seed" type="text" inputmode="numeric" spellcheck="false" aria-label="シード番号" maxlength="40" placeholder="シードを入力"><button class="btn compact" id="same" title="同じシードで再生成">再現</button></div>
  <div style="height:10px"></div><button class="btn primary full" id="generate">↝　完全ランダム生成</button>
  <div class="hint" style="margin-top:9px">新規生成は前回の形状から独立。シードを再入力すると同じ構造を復元できます。</div>
+ <div class="slider-wrap"><div class="sliderlabel"><span>生成プロファイル</span><span class="mini">構造体 / 生命体</span></div><select id="profile" aria-label="生成プロファイル"><option value="structure">味覚構造体（既存）</option><option value="lifeform">味覚生命体（左右対称）</option></select></div>
+ <div class="hint">味覚生命体モードでは、2行×3色のルールは維持しつつ、ロールシャッハのような左右対称、古生代・分子模型・細胞群体を思わせるボディプランを優先します。</div>
+ <div class="slider-wrap"><div class="sliderlabel"><span>生命体の系統</span><span id="lifeBiasValue">自動</span></div><select id="lifeBias" aria-label="生命体の系統"><option value="auto">自動</option><option value="paleo">古生物 / カンブリア</option><option value="molecular">高分子 / 分子模型</option><option value="microbe">細胞 / 微生物</option><option value="arthropod">節足 / 殻 / 触手</option><option value="membrane">膜 / 葉状 / ローブ</option></select></div>
+ <div class="slider-wrap"><div class="sliderlabel"><span>左右対称性</span><span id="symmetryValue">88%</span></div><input type="range" min="0" max="100" value="88" id="symmetry"></div>
+ <div class="slider-wrap"><div class="sliderlabel"><span>解釈の余地 / 曖昧さ</span><span id="ambiguityValue">70%</span></div><input type="range" min="0" max="100" value="70" id="ambiguity"></div>
+ <div class="hint">生命体モードでは、系統で造形の傾向を、左右対称性でミラーの厳密さを、曖昧さで「生物・器官・分子・微生物」にまたがる解釈の幅を調整します。</div>
+ <div class="heading" style="margin-top:8px"><b>生命体プリセット</b><span class="mini">ワンタップで雰囲気を変更</span></div>
+ <div class="button-grid" id="lifePresets"><button class="btn compact" data-life-preset="fossil">古生物標本</button><button class="btn compact" data-life-preset="polymer">高分子胞体</button><button class="btn compact" data-life-preset="microbe">微生物群体</button><button class="btn compact" data-life-preset="ciliate">繊毛浮遊体</button><button class="btn compact" data-life-preset="arthro">節足奇体</button><button class="btn compact" data-life-preset="random">ランダム生命体</button></div>
  <hr class="divider">
  <div class="eyebrow">02 / COLOR PALETTE</div>
  <div class="heading"><b>2行 × 3色 = 6色</b><span class="mini" id="paletteDims">6列・81行</span></div>
@@ -56,7 +64,7 @@ aside{z-index:3;overflow-y:auto;background:var(--panel);border-right:1px solid v
  <div class="eyebrow">04 / LIVING MOTION</div>
  <div class="heading"><b>各パーツが独立して動く</b><span class="mini" id="motionCount">—</span></div>
  <div class="controls-row"><button class="btn primary" id="playMotion" aria-pressed="true">⏸ 一時停止</button><button class="btn" id="restartMotion">↺ 時間リセット</button></div>
- <div class="slider-wrap"><div class="sliderlabel"><span>動きのプリセット</span><span class="mini">形は維持・動きだけ変更</span></div><select id="motionPreset" aria-label="動きのプリセット"><option value="random">完全ランダム</option><option value="organic">有機・呼吸</option><option value="mechanical">機械・軸回転</option><option value="viscous">粘性・融解</option><option value="delicate">繊細・静寂</option><option value="energetic">活発・破裂</option></select></div>
+ <div class="slider-wrap"><div class="sliderlabel"><span>動きのプリセット</span><span class="mini">形は維持・動きだけ変更</span></div><select id="motionPreset" aria-label="動きのプリセット"><option value="random">完全ランダム</option><option value="organic">有機・呼吸</option><option value="mechanical">機械・軸回転</option><option value="viscous">粘性・融解</option><option value="delicate">繊細・静寂</option><option value="energetic">活発・破裂</option><option value="life-breathe">生命体・呼吸</option><option value="life-cilia">生命体・繊毛</option><option value="life-arthro">生命体・節運動</option></select></div>
  <div class="slider-wrap"><div class="sliderlabel"><span>運動速度</span><span id="motionSpeedValue">100%</span></div><input type="range" min="0" max="250" value="100" id="motionSpeed"></div>
  <div class="slider-wrap"><div class="sliderlabel"><span>運動強度</span><span id="motionAmountValue">75%</span></div><input type="range" min="0" max="160" value="75" id="motionAmount"></div>
  <div class="slider-wrap"><div class="sliderlabel"><span>部位別の回転強度</span><span id="rotationPowerValue">100%</span></div><input type="range" min="0" max="200" value="100" id="rotationPower" aria-label="部位別の回転強度"></div>
@@ -84,10 +92,10 @@ aside{z-index:3;overflow-y:auto;background:var(--panel);border-right:1px solid v
  <hr class="divider">
  <div class="eyebrow">05 / EXPORT & ARCHIVE</div>
  <div class="heading"><b>この味覚構造体を残す</b></div>
- <div class="button-grid"><button class="btn" id="savePng">画像 PNG</button><button class="btn" id="saveJson">設定 JSON</button><button class="btn" id="bookmark">☆ お気に入り</button><button class="btn" id="copyLink">再現リンク</button></div>
+ <div class="slider-wrap"><div class="sliderlabel"><span>PNG書き出し倍率</span><span id="exportScaleValue">2×</span></div><select id="exportScale" aria-label="PNG書き出し倍率"><option value="1">1×</option><option value="2" selected>2×</option><option value="3">3×</option><option value="4">4×</option></select></div><div class="button-grid"><button class="btn" id="savePng">画像 PNG</button><button class="btn" id="saveJson">設定 JSON</button><button class="btn" id="bookmark">☆ お気に入り</button><button class="btn" id="copyLink">再現リンク</button></div>
  <div class="heading"><b>お気に入りのシード</b><span class="mini" id="savedCount">0件</span></div>
  <div id="savedList" style="display:grid;gap:6px"></div>
- <p class="footer">v0.9：Canvas描画のポリゴン間引きを廃止・一体面を維持。局所回転・陰影・フラット表示対応。完全オフライン動作・外部ライブラリ不要。実際の3Dメッシュを生成し、加算・減算を符号付き距離場（SDF）で計算する試作版です。造形の品質向上と高度なメッシュ書き出しは今後の拡張対象です。</p>
+ <p class="footer">v1.3：生命体モード専用のクイックプリセットを追加。古生物標本・高分子胞体・微生物群体・繊毛浮遊体などの作風をワンタップで呼び出し、そのまま3D観察・PNG保存できます。完全オフライン動作・外部ライブラリ不要。実際の3Dメッシュを生成し、加算・減算を符号付き距離場（SDF）で計算する試作版です。</p>
 </div></aside>
 <main class="viewer" id="viewer">
  <canvas id="glview" aria-label="ドラッグで回転できる3D構造体"></canvas>
@@ -99,7 +107,7 @@ aside{z-index:3;overflow-y:auto;background:var(--panel);border-right:1px solid v
 <script>
 'use strict';
 const DEFAULT_PALETTE = [["#762200", "#603E00", "#926200", "#7A783F", "#006837", "#020001"], ["#765B04", "#9D934C", "#CDBB65", "#7A783F", "#3A5F67", "#762000"], ["#772002", "#BD552E", "#5B7886", "#6A0C64", "#6A4B51", "#010100"], ["#D4BA66", "#7D8B4E", "#51414C", "#7C6965", "#E6E3D2", "#010000"], ["#3D5E67", "#0C3342", "#5D7987", "#8AA0AB", "#E2E4CF", "#000004"], ["#C0B599", "#E2E4CF", "#848371", "#D3D9D5", "#782103", "#000100"], ["#CDBB65", "#6B4C52", "#848371", "#604500", "#797840", "#762305"], ["#D3B965", "#FBCD78", "#603E01", "#906300", "#BB582F", "#A81A02"], ["#607D4F", "#187874", "#C7CD5F", "#FDD051", "#DA8100", "#C25014"], ["#5A6E62", "#82260D", "#434C31", "#DAB856", "#F9E090", "#724F3B"], ["#7D4E22", "#50531C", "#C68D08", "#AB5F3D", "#B51118", "#693027"], ["#B21317", "#F3D8A1", "#197A71", "#D59E2A", "#C25014", "#332615"], ["#9D312F", "#9B574A", "#B2644D", "#B3877A", "#FED545", "#FCBD32"], ["#A49F67", "#5F5A1A", "#95837F", "#6F524E", "#C5BDBB", "#FEEEB2"], ["#755A13", "#486128", "#85916B", "#A7B199", "#9A8800", "#BDC405"], ["#458016", "#9BBD35", "#DFFB12", "#AAA607", "#7E580D", "#7B4320"], ["#D68A12", "#CB5913", "#734633", "#3B2623", "#E3C203", "#F8F7F2"], ["#DBD1C7", "#856451", "#C9B09A", "#98B7C9", "#B1CAE0", "#000002"], ["#C48B3C", "#859E76", "#5F7B87", "#E3BF21", "#A8753C", "#010000"], ["#FFFEFF", "#D5C280", "#9EA77A", "#DAA66D", "#913E2E", "#8599B2"], ["#4C724D", "#F7EE93", "#FFF8E8", "#EA816E", "#D7000E", "#8F62A5"], ["#A2ABD6", "#F1B0B4", "#AE63A4", "#FFE200", "#85017B", "#8D5FA7"], ["#C475AC", "#DD0081", "#BB8A01", "#673B0E", "#F7C228", "#EF8223"], ["#BF2B45", "#BFB9DD", "#654994", "#43681A", "#86AE67", "#8F60A6"], ["#BABDE0", "#D76D7B", "#A069A2", "#00A759", "#8EC220", "#4BB132"], ["#F4F2D9", "#D7000E", "#251716", "#EB5606", "#FFF9E7", "#568ABA"], ["#FDE801", "#D90011", "#221816", "#0085B0", "#E70012", "#231816"], ["#0387AE", "#E60011", "#FFF8E6", "#221A17", "#DEBD92", "#A17B3C"], ["#F5A158", "#211A14", "#FFFAE4", "#E5AD4E", "#E8DAE9", "#221816"], ["#FEE801", "#D50012", "#231812", "#FFE800", "#D80012", "#221914"], ["#FFE189", "#91B494", "#E70011", "#FCFAE5", "#343331", "#517E81"], ["#F18523", "#FDD54F", "#231717", "#FCD54C", "#FFFAE7", "#527F84"], ["#FCE186", "#C6D9EA", "#D7000F", "#241917", "#FFF8E5", "#52807E"], ["#392E56", "#CD9EB2", "#BE2B55", "#F5F0DA", "#C12C56", "#372F58"], ["#AF322C", "#B40034", "#40593B", "#7FA751", "#F7F6F2", "#80A754"], ["#393488", "#B2D183", "#DC7518", "#CB0B16", "#FBF8E9", "#B5CC4A"], ["#4899C8", "#45838E", "#FFE957", "#EFD135", "#E4C200", "#010000"], ["#FEEA00", "#4CB233", "#57A4DA", "#8F60A8", "#D70010", "#211716"], ["#0071B7", "#B3D0E2", "#E9322C", "#FEEF24", "#008DCF", "#959490"], ["#EA9901", "#BE8F0D", "#2C4616", "#50733D", "#ACC2DA", "#6C82A7"], ["#E70012", "#FABD03", "#01A0DA", "#4C4499", "#F09B00", "#F9BE00"], ["#F28B00", "#D0DC00", "#00A1D7", "#B50E5C", "#F28C04", "#B70E5F"], ["#00A2EA", "#AE3E94", "#B9D101", "#FEF200", "#E5015A", "#E70059"], ["#E30081", "#852183", "#F094AD", "#E65FAB", "#864D84", "#EF1B56"], ["#E70012", "#CFDB00", "#74C7BD", "#A9B402", "#C8000D", "#73C5C1"], ["#FABD00", "#01A0DA", "#5E1984", "#01A0DA", "#F9BE00", "#9225CC"], ["#DF007F", "#B03E95", "#CE4C96", "#C274AE", "#FFE000", "#F4C225"], ["#86AF63", "#446919", "#907CB7", "#664A95", "#BFB8DA", "#FEF397"], ["#C12B46", "#2B693A", "#7F956E", "#A2A9D7", "#E96100", "#F4A502"], ["#009948", "#96C03A", "#FFEC00", "#EC8117", "#E81A2F", "#E30076"], ["#AE3E92", "#AF3E90", "#00A0EA", "#FFF100", "#0169B2", "#E4015D"], ["#EB5403", "#B60E5C", "#009FD9", "#CEDC00", "#B60E5C", "#D0DB03"], ["#E70014", "#4F4399", "#009845", "#019944", "#F9C001", "#009943"], ["#C45013", "#FAD151", "#197A73", "#C8CC5E", "#617E52", "#BF5112"], ["#E85505", "#B60E5C", "#009A41", "#019FDE", "#B80C5E", "#FBBE01"], ["#98290B", "#C8D501", "#259F78", "#47515D", "#B8B600", "#C4D800"], ["#B8AA01", "#B0E809", "#269D7F", "#7E3236", "#B6AA00", "#7E3137"], ["#9B6D53", "#A64D53", "#E7AE43", "#FFDB7A", "#B4231E", "#B42622"], ["#B9262C", "#7D313B", "#E39F94", "#D8716C", "#82575E", "#D0361C"], ["#AE456D", "#AC466D", "#6F7A8E", "#FEE253", "#4E4E66", "#D31134"], ["#F24F0C", "#B11836", "#697988", "#E4C43D", "#B31838", "#E1C53E"], ["#C1150B", "#59446D", "#387F2F", "#3B8030", "#FDB723", "#398030"], ["#BB5513", "#FEC969", "#3F6C58", "#D5C66B", "#6A774C", "#BD5611"], ["#F34A23", "#B91142", "#5A6B41", "#707499", "#BE1045", "#FBB146"], ["#87010A", "#927100", "#005F80", "#2E2858", "#8D5A00", "#936F00"], ["#905101", "#7A8100", "#005D7F", "#6D0736", "#8D5301", "#6B0938"], ["#015E89", "#682359", "#6D7D03", "#968D00", "#870136", "#880033"], ["#87004C", "#4C134A", "#8D5765", "#863965", "#4D2E4E", "#8F0F32"], ["#922A05", "#F0C42D", "#ADB391", "#C99F17", "#802506", "#AAB48F"], ["#FDB723", "#757F4A", "#5C2B2F", "#767E4B", "#FDB724", "#894341"], ["#E6093F", "#B4446A", "#D24F6F", "#C87893", "#FFCA7A", "#FDB07C"], ["#B3937C", "#704E33", "#A57992", "#814567", "#CAB6BF", "#FFEACB"], ["#A8401B", "#5C5336", "#958875", "#B8A6A2", "#E95E00", "#FE9836"], ["#7B621F", "#CE9E52", "#FED57B", "#F47D21", "#B9380E", "#AC2C1F"], ["#706377", "#726378", "#00ADA7", "#D4F657", "#01717D", "#80354C"], ["#878427", "#68374C", "#00AA9D", "#97EA42", "#673A4E", "#97EA42"], ["#962622", "#3B527B", "#01984B", "#019849", "#B9D33A", "#019849"], ["#7E6F2E", "#CEE176", "#197B64", "#ABD67D", "#5A8057", "#7D6E2B"], ["#9B6974", "#702987", "#15827D", "#1891EC", "#702B86", "#D0BD71"], ["#4E3E5B", "#93DCA7", "#7CC0CB", "#63B99E", "#43374F", "#7CBFCF"], ["#9CCEA8", "#01A0DA", "#213C73", "#00A0DA", "#9CCEA9", "#315BB1"]];
-const NAMES = ['密度の高い塊','分岐骨格','斜交する板層','不規則な尖塔','ねじれた環状体','中空の殻','断層状の塊','伸展する腕','鱗状の積層','ねじれた薄壁','流線形の滴','扇状の板群','櫛歯状の稜線','結晶の群生','多房状の塊','割れた弧の束','細胞状の分岐','板と筋の格子','縫合した瘤','折紙状の襞','塊と細い根','斜めの衝突体','不等辺の多面体','低確率プリミティブ'];
+const NAMES = ['密度の高い塊','分岐骨格','斜交する板層','不規則な尖塔','ねじれた環状体','中空の殻','断層状の塊','伸展する腕','鱗状の積層','ねじれた薄壁','流線形の滴','扇状の板群','櫛歯状の稜線','結晶の群生','多房状の塊','割れた弧の束','細胞状の分岐','板と筋の格子','縫合した瘤','折紙状の襞','塊と細い根','斜めの衝突体','不等辺の多面体','低確率プリミティブ','原始節足の半身','膜状ローブ','高分子鎖器官','胞子房の群体','繊毛突起群','殻と触手の複合体'];
 const THEMES={random:['リズム','重量感','強弱','陰陽','テンポ','スピード','スロー','展開','折込','緊張','弛緩','密度','開放','圧縮','伸張','浮遊','沈降','反復','逸脱','侵食','発酵','融和','対立','断裂','連結','拍動','滲出','蓄積','拡散','収束','凝固','溶融','呼吸','跳躍','残響','余韻','粘着','増殖','膨張','しなり','屈曲','ねじれ','断続','停滞','静寂','速度差','重力反転','非対称','均衡','ゆらぎ','結晶化','遅延','反転','断熱','浸透','空洞','硬度差','不協和','濃淡','圧力','振幅','渦流','崩壊','再構築'],rhythm:['リズム','拍動','反復','テンポ','振幅','断続','呼吸','速度差'],gravity:['重量感','沈降','圧縮','蓄積','密度','硬度差','停滞','低速'],opposition:['陰陽','対立','均衡','強弱','反転','硬度差','濃淡','非対称'],growth:['展開','増殖','伸張','分岐','拡散','跳躍','浮遊','開放'],fold:['折込','屈曲','しなり','圧縮','収束','重層','渦流','ねじれ'],dissolve:['融解','滲出','浸透','発酵','凝固','余韻','流動','柔軟'],rupture:['破裂','断裂','崩壊','反転','跳躍','逸脱','再構築','高速度'],quiet:['静寂','残響','余韻','停滞','均衡','スロー','減衰','呼吸'],tension:['緊張','弛緩','対立','収束','伸張','硬度差','圧力','非対称'],chaos:['混沌','逸脱','断続','不協和','無秩序','崩壊','非対称','増殖'],fluid:['流動','粘着','融解','屈曲','伸縮','浸透','しなり','渦流']};
 const TEXTURES=['石粒','絹面','綿毛','鏡面','無光沢','繊維','砂粒','亀裂','陶肌','ゴム','毛羽立ち','濡れ肌','炭化','結晶','金属刷毛','粉末'];
 const MOTIONS=['脈動','自転','伸縮','波打ち','破裂','融解','粘着','折込','微振動','ねじれ','収縮','浮遊','伝播','渦流','凝固','分岐','IK屈曲','多関節','腱引き','局所回転X','局所回転Y','局所回転Z','軌道回転'];
@@ -111,9 +119,23 @@ const MOTION_PRESETS={
  mechanical:{modes:[1,8,9,14,17,19,20,21,22],rate:[.65,1.35],amp:[.02,.11]},
  viscous:{modes:[0,3,5,6,7,10,12,13,16,17,18],rate:[.16,.60],amp:[.05,.19]},
  delicate:{modes:[0,3,8,11,12,16,18,19,20,21],rate:[.10,.42],amp:[.009,.055]},
- energetic:{modes:[0,1,4,8,9,12,14,17,19,20,21,22],rate:[.8,1.7],amp:[.07,.21]}
+ energetic:{modes:[0,1,4,8,9,12,14,17,19,20,21,22],rate:[.8,1.7],amp:[.07,.21]},
+ 'life-breathe':{modes:[0,3,10,11,12,16,17,18],rate:[.18,.68],amp:[.025,.11]},
+ 'life-cilia':{modes:[3,8,11,12,13,18,19,20,21,22],rate:[.55,1.45],amp:[.015,.085]},
+ 'life-arthro':{modes:[1,9,16,17,18,19,20,21,22],rate:[.30,1.10],amp:[.02,.10]}
 };
 const RELATIONSHIPS = ['深く貫入','滑らかに融合','梁による接合','相互に巻きつく','嵌合・重合','組み合わさる','圧縮・食い込み'];
+const LIFE_RELATIONSHIPS = ['正中で癒合','核を囲んで接合','左右葉が重合','咽頭状に密着','膜で抱合','節で連結','殻と触手が噛み合う'];
+const BODYPLANS = ['左右対称の遊泳体','節足殻の原始生物','高分子鎖の器官体','胞子コロニー生命','繊毛膜の微生物','葉状のカンブリア生物','分節した殻と触手','細胞群体の核生物'];
+const LIFE_PRESET_CONFIG={
+ fossil:{label:'古生物標本',lifeBias:'paleo',symmetry:92,ambiguity:58,motionPreset:'life-arthro',theme:'gravity',shading:true,flatTextureOff:false,exportScale:3},
+ polymer:{label:'高分子胞体',lifeBias:'molecular',symmetry:84,ambiguity:78,motionPreset:'life-breathe',theme:'growth',shading:true,flatTextureOff:false,exportScale:3},
+ microbe:{label:'微生物群体',lifeBias:'microbe',symmetry:74,ambiguity:86,motionPreset:'life-breathe',theme:'dissolve',shading:true,flatTextureOff:false,exportScale:3},
+ ciliate:{label:'繊毛浮遊体',lifeBias:'membrane',symmetry:88,ambiguity:82,motionPreset:'life-cilia',theme:'fluid',shading:true,flatTextureOff:false,exportScale:3},
+ arthro:{label:'節足奇体',lifeBias:'arthropod',symmetry:90,ambiguity:63,motionPreset:'life-arthro',theme:'tension',shading:true,flatTextureOff:false,exportScale:3},
+ random:{label:'ランダム生命体',lifeBias:'auto',symmetry:Math.round(60+Math.random()*35),ambiguity:Math.round(55+Math.random()*40),motionPreset:['life-breathe','life-cilia','life-arthro'][Math.floor(Math.random()*3)],theme:['random','growth','fluid','chaos','dissolve'][Math.floor(Math.random()*5)],shading:true,flatTextureOff:false,exportScale:2}
+};
+const LIFE_KEYWORDS = ['古生代','カンブリア','高分子','細胞','微生物','胞子','外骨格','繊毛','触手','膜','核','群体','原始的','化石的'];
 const $ = (id)=>document.getElementById(id);
 let palette=DEFAULT_PALETTE.map(a=>a.slice());
 let current=null, mesh=null, gl=null, ctx2d=null, softwareMode=false, prevFrameKey='', program=null, uniforms={}, attrs={}, inputPointer=null, rotation={yaw:-0.37,pitch:0.18}, initialRotation={yaw:-0.37,pitch:0.18}, zoom=10.5, auto=false, generating=false, saved=[], isPlaying=!matchMedia('(prefers-reduced-motion: reduce)').matches, motionClock=0, lastTick=0, textureLevel=.70, motionAmplitude=.75, motionSpeed=1, rotationPower=1, ikPower=1, shadingEnabled=true, shadingStrength=1, flatTextureOff=false, motionPreset='random', partRotationEnabled=new Map();
@@ -124,6 +146,7 @@ function between(r,a,b){return a+(b-a)*r()}
 function pick(r,ar){return ar[Math.min(ar.length-1,Math.floor(r()*ar.length))]}
 function int(r,a,b){return Math.floor(between(r,a,b+1))}
 function shufflePick(r,count,n){let a=Array.from({length:count},(_,i)=>i);for(let i=a.length-1;i>0;i--){let j=int(r,0,i);[a[i],a[j]]=[a[j],a[i]]}return a.slice(0,n)}
+function pickMany(r,ar,n){let pool=ar.slice(),out=[];for(let i=0;i<Math.min(n,pool.length);i++){let idx=int(r,0,pool.length-1);out.push(pool.splice(idx,1)[0])}return out}
 function newSeed(){let a=new Uint32Array(2);if(crypto?.getRandomValues)crypto.getRandomValues(a);else{a[0]=Math.random()*2**32;a[1]=Math.random()*2**32}return ((BigInt(a[0])<<32n)|BigInt(a[1])).toString(10).slice(0,13).padStart(13,'0')}
 function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v))}
 function vec(x=0,y=0,z=0){return [x,y,z]}
@@ -133,20 +156,60 @@ function lerp3(a,b,t){return [lerp(a[0],b[0],t),lerp(a[1],b[1],t),lerp(a[2],b[2]
 function hex2rgb(s){return [parseInt(s.slice(1,3),16)/255,parseInt(s.slice(3,5),16)/255,parseInt(s.slice(5,7),16)/255]}
 function makeRecipe(seed){
  let pr=generator(seed,'palette'),lr=generator(seed,'left'),rr=generator(seed,'right'),mr=generator(seed,'merge'),gr=generator(seed,'global'),kr=generator(seed,'keywords');
+ const profile=$('profile')?.value||'structure';
+ const lifeBias=$('lifeBias')?.value||'auto';
+ const symmetry=(parseInt($('symmetry')?.value||'88',10))/100;
+ const ambiguity=(parseInt($('ambiguity')?.value||'70',10))/100;
  let rows=shufflePick(pr,palette.length,2),leftCols=shufflePick(pr,palette[rows[0]].length,3),rightCols=shufflePick(pr,palette[rows[1]].length,3);
  let colors=[...leftCols.map(c=>palette[rows[0]][c]),...rightCols.map(c=>palette[rows[1]][c])];
- let factor=between(mr,.40,.98),cmpl=between(gr,.24,.90);
+ let factor=between(mr,profile==='lifeform'?.72:.40,.98),cmpl=between(gr,profile==='lifeform'?.35:.24,profile==='lifeform'?.94:.90);
  if($('override').checked){factor=parseInt($('fusion').value)/100;cmpl=parseInt($('complexity').value)/100}
- const theme=$('theme').value,source=THEMES[theme]||THEMES.random,keywords=shufflePick(kr,source.length,int(kr,4,Math.min(source.length,7))).map(i=>source[i]);
- const semantic={weight:keywords.some(w=>['重量感','沈降','圧縮','蓄積','密度'].includes(w))?1:0,quiet:keywords.some(w=>['静寂','余韻','スロー','停滞'].includes(w))?1:0,energetic:keywords.some(w=>['破裂','テンポ','跳躍','高速度'].includes(w))?1:0,fold:keywords.some(w=>['折込','しなり','屈曲','ねじれ'].includes(w))?1:0,fluid:keywords.some(w=>['融解','流動','浸透','粘着'].includes(w))?1:0};
- let modes=[int(lr,0,NAMES.length-2),int(rr,0,NAMES.length-2)];
- if(lr()<.055)modes[0]=NAMES.length-1;if(rr()<.055)modes[1]=NAMES.length-1;
- if(semantic.fold&&lr()<.36)modes[0]=pick(lr,[9,15,19]);
- if(semantic.weight&&rr()<.31)modes[1]=pick(rr,[0,6,20]);
- const relation=int(mr,0,RELATIONSHIPS.length-1),d=lerp(3.1,.35,factor)+between(mr,-.18,.18);
+ if(profile==='lifeform'){factor=clamp(factor*(.85+.25*symmetry),.56,.99);cmpl=clamp(cmpl*(.82+.28*ambiguity),.28,.98)}
+ const theme=$('theme').value,baseSource=THEMES[theme]||THEMES.random;
+ let source=profile==='lifeform'?[...baseSource,...LIFE_KEYWORDS]:baseSource;
+ if(profile==='lifeform'){
+   if(lifeBias==='paleo')source=[...source,'外骨格','原始的','化石的','古生代','カンブリア'];
+   else if(lifeBias==='molecular')source=[...source,'高分子','核','群体','膜'];
+   else if(lifeBias==='microbe')source=[...source,'細胞','微生物','胞子','繊毛'];
+   else if(lifeBias==='arthropod')source=[...source,'外骨格','触手','節','殻'];
+   else if(lifeBias==='membrane')source=[...source,'膜','ローブ','群体','触手'];
+ }
+ const keywords=shufflePick(kr,source.length,int(kr,4,Math.min(source.length,8))).map(i=>source[i]);
+ const bodyPools={auto:BODYPLANS,paleo:['葉状のカンブリア生物','節足殻の原始生物','分節した殻と触手'],molecular:['高分子鎖の器官体','細胞群体の核生物'],microbe:['胞子コロニー生命','繊毛膜の微生物','細胞群体の核生物'],arthropod:['節足殻の原始生物','分節した殻と触手','左右対称の遊泳体'],membrane:['葉状のカンブリア生物','繊毛膜の微生物','左右対称の遊泳体']};
+ const bodyPlan=profile==='lifeform'?pick(gr,bodyPools[lifeBias]||BODYPLANS):'';
+ const semantic={weight:keywords.some(w=>['重量感','沈降','圧縮','蓄積','密度'].includes(w))?1:0,quiet:keywords.some(w=>['静寂','余韻','スロー','停滞'].includes(w))?1:0,energetic:keywords.some(w=>['破裂','テンポ','跳躍','高速度'].includes(w))?1:0,fold:keywords.some(w=>['折込','しなり','屈曲','ねじれ'].includes(w))?1:0,fluid:keywords.some(w=>['融解','流動','浸透','粘着'].includes(w))?1:0,life:profile==='lifeform'?1:0,molecular:keywords.some(w=>['高分子','分子'].includes(w))?1:0,micro:keywords.some(w=>['細胞','微生物','胞子','繊毛'].includes(w))?1:0,paleo:keywords.some(w=>['古生代','カンブリア','外骨格','化石的','原始的'].includes(w))?1:0,symmetry,ambiguity,lifeBias};
+ let modes, relationLabels=profile==='lifeform'?LIFE_RELATIONSHIPS:RELATIONSHIPS;
+ if(profile==='lifeform'){
+  const modePools={auto:[24,25,26,27,28,29,16,18,14,7,4,20],paleo:[24,25,29,4,20],molecular:[26,27,18,16],microbe:[27,28,16,18,14],arthropod:[24,29,7,4,20],membrane:[25,28,5,9,14]};
+  const pool=modePools[lifeBias]||modePools.auto;
+  let picks=pickMany(lr,pool,2);while(picks.length<2)picks.push(picks[0]);
+  let core=picks[0], flank=(rr()<(.25+.5*ambiguity))?core:picks[1];
+  if(semantic.molecular&&rr()<.75)flank=26;
+  if(semantic.micro&&lr()<.75)core=pick(lr,[27,28,16,18]);
+  if(semantic.paleo&&lr()<.75)core=pick(lr,[24,25,29,4]);
+  modes=[core,flank];
+ }else{
+  modes=[int(lr,0,NAMES.length-2),int(rr,0,NAMES.length-2)];
+  if(lr()<.055)modes[0]=NAMES.length-1;if(rr()<.055)modes[1]=NAMES.length-1;
+  if(semantic.fold&&lr()<.36)modes[0]=pick(lr,[9,15,19]);
+  if(semantic.weight&&rr()<.31)modes[1]=pick(rr,[0,6,20]);
+ }
+ const relation=int(mr,0,relationLabels.length-1),d=(profile==='lifeform'?lerp(1.18,.06,factor)+between(mr,-.06,.06)*(1-0.55*symmetry):lerp(3.1,.35,factor)+between(mr,-.18,.18));
  let textures=[Array.from({length:3},()=>int(lr,0,TEXTURES.length-1)),Array.from({length:3},()=>int(rr,0,TEXTURES.length-1))];
- return {seed,colors,rows,columns:[leftCols,rightCols],modes,relation,fusion:factor,complexity:cmpl,dist:d,keywords,theme,semantic,textures,gradient:parseInt($('gradient').value)/100,rotations:[[between(lr,-3,3),between(lr,-3,3),between(lr,-3,3)],[between(rr,-3,3),between(rr,-3,3),between(rr,-3,3)]],scale:[[between(lr,.7,1.25),between(lr,.7,1.25),between(lr,.7,1.25)],[between(rr,.7,1.25),between(rr,.7,1.25),between(rr,.7,1.25)]],material:[int(lr,0,4),int(rr,0,4)],background:int(gr,0,4),csg:[0,0]};
+ if(profile==='lifeform'&&gr()<(.4+.5*symmetry))textures[1]=textures[0].slice().reverse();
+ let rotations,scales;
+ if(profile==='lifeform'){
+  let baseRot=[between(lr,-.55,.55),between(lr,-1.0,1.0),between(lr,-.6,.6)],dev=(1-symmetry)*.85;
+  rotations=[baseRot,[baseRot[0]+between(rr,-dev,dev),-baseRot[1]+between(rr,-dev,dev),-baseRot[2]+between(rr,-dev,dev)]];
+  let s0=[between(lr,.82,1.22),between(lr,.82,1.22),between(lr,.82,1.22)],sdev=1-symmetry,f=[between(rr,1-sdev*.2,1+sdev*.2),between(rr,1-sdev*.2,1+sdev*.2),between(rr,1-sdev*.2,1+sdev*.2)];
+  scales=[s0,[s0[0]*f[0],s0[1]*f[1],s0[2]*f[2]]];
+ }else{
+  rotations=[[between(lr,-3,3),between(lr,-3,3),between(lr,-3,3)],[between(rr,-3,3),between(rr,-3,3),between(rr,-3,3)]];
+  scales=[[between(lr,.7,1.25),between(lr,.7,1.25),between(lr,.7,1.25)],[between(rr,.7,1.25),between(rr,.7,1.25),between(rr,.7,1.25)]];
+ }
+ return {seed,profile,bodyPlan,relationLabels,lifeBias,symmetry,ambiguity,colors,rows,columns:[leftCols,rightCols],modes,relation,fusion:factor,complexity:cmpl,dist:d,keywords,theme,semantic,textures,gradient:parseInt($('gradient').value)/100,rotations,scale:scales,material:[int(lr,0,4),int(rr,0,4)],background:int(gr,0,4),csg:[0,0]};
 }
+
 
 function paletteDisplay(){const canvas=$('paletteView'),ctx=canvas.getContext('2d');canvas.width=palette[0].length;canvas.height=palette.length;for(let y=0;y<palette.length;y++){for(let x=0;x<palette[y].length;x++){ctx.fillStyle=palette[y][x];ctx.fillRect(x,y,1,1)}}$('paletteDims').textContent=`${palette[0].length}列・${palette.length}行`}
 function syncPalette(r){$('leftRow').textContent='ROW '+String(r.rows[0]+1).padStart(2,'0');$('rightRow').textContent='ROW '+String(r.rows[1]+1).padStart(2,'0');for(let side=0;side<2;side++){$(side?'rightSwatches':'leftSwatches').innerHTML=r.colors.slice(side*3,side*3+3).map(c=>`<div class="swatch" data-hex="${c}" title="${c}" style="background:${c}"></div>`).join('')};for(let [i,id] of ['markL','markR'].entries()){$(id).style.top=((r.rows[i]+.5)/palette.length*140)+'px'}}
@@ -170,7 +233,7 @@ function sdfPrimitive(p,s){let v=localPoint(p,s),x=v[0],y=v[1],z=v[2];switch(s.t
  }return 100}
 function smin(a,b,k){if(k<=0)return Math.min(a,b);let h=clamp(.5+.5*(b-a)/k,0,1);return lerp(b,a,h)-k*h*(1-h)}
 function primitive(type,p,ext,rot=[0,0,0],round=0){return {type,p,ext,rot,round}}
-function buildSDFRecipe(r,side){const rand=generator(r.seed,'shape'+side),mode=r.modes[side],base=[],cuts=[],scale=r.scale[side];
+function buildSDFRecipe(r,side){const rand=generator(r.seed,r.profile==='lifeform'?'shape-life':'shape'+side),mode=r.modes[side],base=[],cuts=[],scale=r.scale[side];
  function addShape(type,p,e,rotation=null){base.push(primitive(type,p,e,rotation||[between(rand,-1,1),between(rand,-1,1),between(rand,-1,1)],between(rand,0,.08)))}
  const pivot=[between(rand,-.12,.12),between(rand,-.12,.12),between(rand,-.12,.12)];
  switch(mode){
@@ -198,6 +261,12 @@ function buildSDFRecipe(r,side){const rand=generator(r.seed,'shape'+side),mode=r
  case 21: addShape('octa',pivot,[.96,.89,.84]);for(let j=0;j<int(rand,3,6);j++)addShape('prism',[between(rand,-.5,.5),between(rand,-.6,.6),between(rand,-.6,.6)],[between(rand,.2,.45),between(rand,.28,.65),between(rand,.3,.7)]);break;
  case 22: addShape('super',pivot,[.75,.81,.68]);for(let j=0;j<int(rand,3,7);j++)addShape('octa',[between(rand,-.7,.7),between(rand,-.6,.6),between(rand,-.55,.55)],[between(rand,.2,.4),between(rand,.3,.5),between(rand,.2,.53)]);break;
  case 23: addShape(pick(rand,['blob','box','cylinder','cone','torus']),pivot,[.76,.73,.7]);break;
+ case 24: addShape('capsule',pivot,[.20,0,.84],[0,0,0]);for(let j=0;j<int(rand,5,9);j++)addShape('capsule',[between(rand,-.26,.26),between(rand,-.82,.82),between(rand,-.42,.42)],[between(rand,.06,.16),0,between(rand,.22,.58)],[between(rand,-.35,.35),between(rand,-.45,.45),between(rand,-1.1,1.1)]);for(let j=0;j<int(rand,2,5);j++)addShape('blob',[between(rand,-.22,.22),between(rand,-.72,.72),between(rand,-.32,.32)],[between(rand,.14,.28),between(rand,.10,.22),between(rand,.10,.24)]);break;
+ case 25: addShape('elliptic',pivot,[.60,.35,.78]);for(let j=0;j<int(rand,4,8);j++)addShape('box',[between(rand,-.35,.35),between(rand,-.68,.68),between(rand,-.55,.55)],[between(rand,.22,.58),between(rand,.03,.12),between(rand,.16,.52)]);for(let j=0;j<int(rand,2,4);j++)addShape('crescent',[between(rand,-.18,.18),between(rand,-.5,.5),between(rand,-.35,.35)],[between(rand,.24,.56),between(rand,.08,.18),0]);break;
+ case 26: addShape('blob',pivot,[.32,.32,.32]);for(let j=0;j<int(rand,6,11);j++){let py=lerp(-.9,.9,j/Math.max(1,int(rand,6,11)-1)),px=Math.sin(py*3.1+between(rand,-.6,.6))*.18,pz=Math.cos(py*2.3+between(rand,-.6,.6))*.22;addShape(pick(rand,['blob','capsule','elliptic']),[px,py,pz],[between(rand,.10,.22),between(rand,.08,.18),between(rand,.12,.28)],[between(rand,-.5,.5),between(rand,-.5,.5),between(rand,-.5,.5)])}break;
+ case 27: addShape('blob',pivot,[.50,.47,.54]);for(let j=0;j<int(rand,7,14);j++)addShape('elliptic',[between(rand,-.62,.62),between(rand,-.62,.62),between(rand,-.55,.55)],[between(rand,.11,.24),between(rand,.11,.24),between(rand,.11,.24)]);for(let j=0;j<int(rand,2,5);j++)addShape('capsule',[between(rand,-.22,.22),between(rand,-.55,.55),between(rand,-.22,.22)],[between(rand,.05,.11),0,between(rand,.16,.36)]);break;
+ case 28: addShape('super',pivot,[.45,.41,.50]);for(let j=0;j<int(rand,8,16);j++){let ang=j/Math.max(1,int(rand,8,16))*Math.PI*2+between(rand,-.4,.4),rad=between(rand,.28,.78);addShape('capsule',[Math.cos(ang)*rad,between(rand,-.55,.55),Math.sin(ang)*rad],[between(rand,.04,.10),0,between(rand,.18,.48)],[between(rand,-.5,.5),between(rand,-.5,.5),between(rand,-.5,.5)])}break;
+ case 29: addShape('crescent',pivot,[.68,.18,0]);addShape('blob',[between(rand,-.12,.12),between(rand,-.08,.08),between(rand,-.08,.08)],[.38,.28,.34]);for(let j=0;j<int(rand,4,9);j++)addShape('capsule',[between(rand,-.18,.18),between(rand,-.42,.42),between(rand,-.45,.45)],[between(rand,.05,.12),0,between(rand,.24,.64)],[between(rand,-.7,.7),between(rand,-.4,.4),between(rand,-1.4,1.4)]);break;
  }
  const ncut = int(rand,0,Math.round(1+r.complexity*5));for(let i=0;i<ncut;i++){let typ=pick(rand,['blob','blob','box','capsule']);cuts.push(primitive(typ,[between(rand,-.82,.82),between(rand,-.82,.82),between(rand,-.82,.82)],typ==='capsule'?[between(rand,.15,.38),0,between(rand,.3,1.1)]:[between(rand,.20,.62),between(rand,.2,.62),between(rand,.2,.62)],[between(rand,-2,2),between(rand,-2,2),between(rand,-2,2)],between(rand,0,.05)))}
  let k=between(rand,.005,.28)*(mode===2||mode===6||mode===17?.18:1);let warp=between(rand,.003,.15)*(mode===2||mode===6||mode===17?.32:1);let phase=between(rand,0,7);r.csg[side]=cuts.length;
@@ -248,6 +317,7 @@ function meshField(builder,sdf,offset,rotation,colors,rand,quality,material,reci
 }
 function tube(builder,path,radii,col,material,sides=7){let mat=[material===1?.13:material===2?.5:.75,material===4?.45:.015];for(let i=0;i<path.length-1;i++){let a=path[i],b=path[i+1],axis=normalize(sub(b,a)),ref=Math.abs(axis[1])>.89?[1,0,0]:[0,1,0],u=normalize(cross(axis,ref)),v=normalize(cross(axis,u));let ra=radii[i],rb=radii[i+1];for(let j=0;j<sides;j++){let t=j*2*Math.PI/sides,t2=(j+1)*2*Math.PI/sides;const norm1=add(mul(u,Math.cos(t)),mul(v,Math.sin(t))),norm2=add(mul(u,Math.cos(t2)),mul(v,Math.sin(t2))),pa=add(a,mul(norm1,ra)),pb=add(b,mul(norm1,rb)),pc=add(b,mul(norm2,rb)),pd=add(a,mul(norm2,ra));builder.tri(pa,pb,pc,col,mat,norm1,norm1,norm2);builder.tri(pa,pc,pd,col,mat,norm1,norm2,norm2)}}}
 function bezier(a,b,c,d,t){let u=1-t;return add(add(mul(a,u*u*u),mul(b,3*u*u*t)),add(mul(c,3*u*t*t),mul(d,t*t*t)))}
+const mirrorX=p=>[-p[0],p[1],p[2]];
 function ribbon(builder,path,width,col,matType,phase){let mat=[matType===1?.13:.48,.007];for(let i=0;i<path.length-1;i++){let a=path[i],b=path[i+1],av=normalize(sub(path[Math.min(path.length-1,i+1)],path[Math.max(0,i-1)])),twist=i*.25+phase,uu=normalize(cross(av,[Math.sin(twist),Math.cos(twist),.45]));if(length3(uu)<.01)uu=[1,0,0];let av2=normalize(sub(path[Math.min(path.length-1,i+2)],path[i])),vv=normalize(cross(av2,[Math.sin(twist+.25),Math.cos(twist+.25),.45]));let w1=width*(.6+.4*Math.sin(Math.PI*i/(path.length-1))),w2=width*(.6+.4*Math.sin(Math.PI*(i+1)/(path.length-1))),p1=add(a,mul(uu,w1)),p2=sub(a,mul(uu,w1)),p3=add(b,mul(vv,w2)),p4=sub(b,mul(vv,w2));builder.tri(p1,p2,p3,col,mat);builder.tri(p2,p4,p3,col,mat)}}
 function extraDetails(builder,recipe,side){let r=generator(recipe.seed,'details'+side),off=[side?recipe.dist/2:-recipe.dist/2,between(r,-.15,.15),0],rot=recipe.rotations[side],colors=recipe.colors.slice(side*3,side*3+3).map(hex2rgb),complexity=recipe.complexity;
  const n=int(r,4,Math.round(7+complexity*18));for(let j=0;j<n;j++){let type=int(r,0,16);let a=[between(r,-.8,.8),between(r,-.85,.85),between(r,-.65,.65)],b=[between(r,-1.2,1.2),between(r,-1.2,1.2),between(r,-1.2,1.2)],points=[];if(type<=1){points=[a,b]}else{let m=[between(r,-1,1),between(r,-1,1),between(r,-1,1)];points=[a,m,b]}
@@ -262,7 +332,17 @@ function extraDetails(builder,recipe,side){let r=generator(recipe.seed,'details'
  else if(type===16){let hub=world[Math.floor(world.length/2)],tip=add(hub,rotatePoint([between(r,-.55,.55),between(r,-.55,.55),between(r,-.55,.55)],rot));tube(builder,[world[0],hub,tip],[between(r,.03,.11),between(r,.02,.08),.002],color,recipe.material[side],int(r,3,6))}
  else tube(builder,world,world.map((p,i)=>i===0||i===world.length-1?radius*.7:radius),color,recipe.material[side],int(r,4,8));}
 }
-function connectors(builder,recipe){let r=generator(recipe.seed,'connectors'),d=recipe.dist,le=[-d/2,0,0],ri=[d/2,0,0],c1=recipe.colors.slice(0,3).map(hex2rgb),c2=recipe.colors.slice(3).map(hex2rgb),rel=recipe.relation,n=rel===2?int(r,8,13):rel===6?int(r,6,10):int(r,4,9);
+function extraDetailsLifeform(builder,recipe){
+ let r=generator(recipe.seed,'life-details'),leftColors=recipe.colors.slice(0,3).map(hex2rgb),rightColors=recipe.colors.slice(3).map(hex2rgb),half=recipe.dist/2;
+ const biasFamilies={auto:[0,1,2,3,4,5],paleo:[0,3,4,5],molecular:[0,2,5],microbe:[1,3,5],arthropod:[0,2,3,4],membrane:[1,4,5]};
+ const familyPool=biasFamilies[recipe.lifeBias]||biasFamilies.auto;
+ const asym=(1-(recipe.symmetry||.88));
+ function drawAppendage(path,color,material,texture,key,family,width){builder.beginPart(path[Math.floor(path.length/2)],key);builder.setTexture(texture);if(family===0)tube(builder,path,path.map((p,i)=>lerp(width,width*.18,i/(path.length-1))),color,material,6);else if(family===1)ribbon(builder,path,width*2.3,color,material,0);else if(family===2){tube(builder,path,[width,width*.7,width*.18],color,material,5);let hub=path[1];for(let q=0;q<4;q++){let ang=q*Math.PI/1.5,tip=add(hub,[Math.cos(ang)*width*4,Math.sin(ang)*width*2,Math.sin(ang*1.3)*width*4]);tube(builder,[hub,tip],[width*.24,.002],color,material,4)}}else if(family===3){for(let i=0;i<path.length-1;i++)tube(builder,[path[i],path[i+1]],[width*(1-.2*i),Math.max(.004,width*(.82-.2*i))],color,material,7)}else if(family===4){let a=path[0],b=path[1],c=path[2],wing=add(b,[0,width*3,width*1.5]);builder.tri(a,b,wing,color,[.35,.05]);builder.tri(b,c,wing,color,[.35,.05]);}else{let hub=path[1];for(let q=0;q<5;q++){let t=q/4,tip=lerp3(path[1],path[2],t);tube(builder,[hub,add(tip,[0,(q-2)*width*1.1,Math.sin(q)*width*1.2])],[width*.18,.002],color,material,4)}}}
+ const n=int(r,10,Math.round(16+recipe.complexity*18));
+ for(let j=0;j<n;j++){let family=pick(r,familyPool),y=between(r,-.95,.95),z=between(r,-.78,.78),x=-half-between(r,.02,.55),mid=[x-between(r,.06,.55),y+between(r,-.35,.35),z+between(r,-.4,.4)],tip=[mid[0]-between(r,.12,.85),mid[1]+between(r,-.45,.45),mid[2]+between(r,-.45,.45)],leftPath=[[x,y,z],mid,tip],rightPath=leftPath.map(mirrorX).map((p,idx)=>idx===0?p:[p[0],p[1]+between(r,-asym*.35,asym*.35),p[2]+between(r,-asym*.35,asym*.35)]),ci=int(r,0,2),width=between(r,.02,.08);drawAppendage(leftPath,leftColors[ci],recipe.material[0],recipe.textures[0][ci],'lifeL|'+j,family,width);drawAppendage(rightPath,rightColors[2-ci],recipe.material[1],recipe.textures[1][2-ci],'lifeR|'+j,family,width)}
+ for(let i=0;i<int(r,4,9);i++){let y=between(r,-.55,.55),z=between(r,-.45,.45),start=[-half*0.8,y,z],end=[half*0.8,y+between(r,-.06,.06),z+between(r,-.06,.06)],path=Array.from({length:10},(_,j)=>bezier(start,[-half*.15,y+between(r,-.2,.2),z+between(r,-.16,.16)],[half*.15,y+between(r,-.2,.2),z+between(r,-.16,.16)],end,j/9));builder.beginPart([0,y,z],'nucleus|'+i);builder.setTexture(recipe.textures[i%2][int(r,0,2)]);if(i%3===0)ribbon(builder,path,between(r,.04,.14),lerp3(leftColors[int(r,0,2)],rightColors[int(r,0,2)],.5),1,between(r,0,6));else{let rad=path.map((p,j)=>between(r,.015,.08)*(.85+.15*Math.sin(j/9*Math.PI)));tube(builder,path.slice(0,6),rad.slice(0,6),leftColors[int(r,0,2)],0,6);tube(builder,path.slice(4),rad.slice(4),rightColors[int(r,0,2)],1,6)}}
+}
+function connectors(builder,recipe){let r=generator(recipe.seed,'connectors'),d=recipe.dist,le=[-d/2,0,0],ri=[d/2,0,0],c1=recipe.colors.slice(0,3).map(hex2rgb),c2=recipe.colors.slice(3).map(hex2rgb),labels=recipe.relationLabels||RELATIONSHIPS,rel=recipe.relation,n=rel===2?int(r,8,13):rel===6?int(r,6,10):int(r,4,9);
  for(let i=0;i<n;i++){let start=add(le,[between(r,.25,.75),between(r,-.65,.65),between(r,-.6,.6)]),end=add(ri,[between(r,-.75,-.25),between(r,-.65,.65),between(r,-.6,.6)]);
  const sideA=pick(r,c1),sideB=pick(r,c2),cy=between(r,-.45,.45),cz=between(r,-.6,.6),bend=between(r,-1.5,1.5)*(rel===3?1.7:1),b=[-d*.13,cy+bend*.5,cz],c=[d*.13,cy-bend*.5,cz+bend*.2],len=16,path=Array.from({length:len},(_,j)=>bezier(start,b,c,end,j/(len-1)));
  builder.beginPart([0,cy,cz],'connector|'+i);builder.setTexture(recipe.textures[i%2][int(r,0,2)]);if(rel===2||rel===4){const p=[start,end],rad=[between(r,.04,.18),between(r,.04,.18)];tube(builder,p,rad,sideA,1,int(r,4,7))}
@@ -271,7 +351,8 @@ function connectors(builder,recipe){let r=generator(recipe.seed,'connectors'),d=
  }
  if(rel===0||rel===4||rel===5){let col=pick(r,c1),col2=pick(r,c2);for(let i=0;i<int(r,2,5);i++){builder.beginPart([0,0,0],'connector|joint|'+i);builder.setTexture(recipe.textures[i%2][int(r,0,2)]);let a=[between(r,-.45,-.05),between(r,-.6,.6),between(r,-.5,.5)],b=[between(r,.1,.5),between(r,-.6,.6),between(r,-.5,.5)],rad=between(r,.17,.35);tube(builder,[a,b],[rad,rad*.7],i%2?col:col2,1,7)}}
 }
-function makeGeometry(recipe){let builder=new Builder(recipe);let N=softwareMode?(recipe.complexity>.74?23:recipe.complexity>.46?21:19):(recipe.complexity>.74?35:recipe.complexity>.46?32:28);for(let side=0;side<2;side++){let shape=buildSDFRecipe(recipe,side),rng=generator(recipe.seed,'mesh'+side),offset=[(side?1:-1)*recipe.dist/2,0,0],colors=recipe.colors.slice(side*3,side*3+3).map(hex2rgb);builder.beginPart(offset,'mass'+side);meshField(builder,shape.sdf,offset,recipe.rotations[side],colors,rng,N,recipe.material[side],recipe,side);extraDetails(builder,recipe,side)}connectors(builder,recipe);return builder}
+function connectorsLifeform(builder,recipe){let r=generator(recipe.seed,'life-connect'),d=recipe.dist,c1=recipe.colors.slice(0,3).map(hex2rgb),c2=recipe.colors.slice(3).map(hex2rgb),n=int(r,7,13);for(let i=0;i<n;i++){let y=between(r,-.85,.85),z=between(r,-.65,.65),start=[-d/2-between(r,-.03,.12),y,z],end=mirrorX(start),b=[-d*.18,y+between(r,-.22,.22),z+between(r,-.18,.18)],c=[d*.18,y+between(r,-.22,.22),z+between(r,-.18,.18)],path=Array.from({length:14},(_,j)=>bezier(start,b,c,end,j/13));builder.beginPart([0,y,z],'life-bridge|'+i);builder.setTexture(recipe.textures[i%2][int(r,0,2)]);if(i%3===0)ribbon(builder,path,between(r,.05,.18),lerp3(pick(r,c1),pick(r,c2),.5),1,between(r,0,6));else{let width=between(r,.03,.12),rad=path.map((p,j)=>width*(.5+.5*Math.sin(j/13*Math.PI)));tube(builder,path.slice(0,8),rad.slice(0,8),pick(r,c1),0,6);tube(builder,path.slice(6),rad.slice(6),pick(r,c2),1,6)}}for(let i=0;i<int(r,3,6);i++){let c=[0,between(r,-.35,.35),between(r,-.3,.3)],arms=int(r,4,8),color=lerp3(c1[int(r,0,2)],c2[int(r,0,2)],.5);builder.beginPart(c,'life-core|'+i);builder.setTexture(recipe.textures[i%2][int(r,0,2)]);for(let a=0;a<arms;a++){let ang=a*Math.PI*2/arms,tip=add(c,[Math.cos(ang)*between(r,.12,.38),Math.sin(ang)*between(r,.08,.32),between(r,-.12,.12)]);tube(builder,[c,tip],[between(r,.014,.05),.002],color,1,4)}}}
+function makeGeometry(recipe){let builder=new Builder(recipe);let N=softwareMode?(recipe.complexity>.74?23:recipe.complexity>.46?21:19):(recipe.complexity>.74?35:recipe.complexity>.46?32:28);for(let side=0;side<2;side++){let shape=buildSDFRecipe(recipe,side),rng=generator(recipe.seed,'mesh'+side),offset=[(side?1:-1)*recipe.dist/2,0,0],colors=recipe.colors.slice(side*3,side*3+3).map(hex2rgb);builder.beginPart(offset,'mass'+side);meshField(builder,shape.sdf,offset,recipe.rotations[side],colors,rng,N,recipe.material[side],recipe,side);if(recipe.profile==='lifeform'){}else extraDetails(builder,recipe,side)}if(recipe.profile==='lifeform'){extraDetailsLifeform(builder,recipe);connectorsLifeform(builder,recipe)}else connectors(builder,recipe);return builder}
 const vs=`
 precision highp float;
 attribute vec3 aPos;attribute vec3 aNormal;attribute vec3 aColor;attribute float aRough;attribute float aGlow;attribute float aPart;attribute float aTexture;
@@ -386,7 +467,7 @@ function upload(b){
 
 function partCategory(key){return key.startsWith('mass0')||key.startsWith('detail0')?'left':key.startsWith('mass1')||key.startsWith('detail1')?'right':'fusion'}
 function partLabel(key){let g=partCategory(key),prefix=g==='left'?'左':g==='right'?'右':'融合';if(key.startsWith('mass'))return prefix+'・母体';if(key.startsWith('detail'))return prefix+'・細部 '+(parseInt(key.split('|')[1]||'0')+1);if(key.includes('joint'))return prefix+'・接合片 '+(parseInt(key.split('|').pop())+1);return prefix+'・連結 '+(parseInt(key.split('|').pop())+1)}
-function presetForPart(key,base){let p=MOTION_PRESETS[motionPreset];if(!p)return base.slice();let r=generator(current?.seed||$('seed').value,'preset|'+motionPreset+'|'+key),first=pick(r,p.modes),second=pick(r,p.modes);if(second===first)second=pick(r,p.modes.filter(v=>v!==first));return [first,second,between(r,p.rate[0],p.rate[1]),between(r,p.amp[0],p.amp[1])]}
+function presetForPart(key,base){let p=MOTION_PRESETS[motionPreset];if(!p)return base.slice();let r=generator(current?.seed||$('seed').value,'preset|'+motionPreset+'|'+key),pool=p.modes.slice();if(current?.profile==='lifeform'){if(motionPreset==='life-breathe'){if(key.startsWith('life-core')||key.startsWith('nucleus'))pool=[0,10,11,12,16,17,18];else if(key.startsWith('life-bridge'))pool=[0,3,6,12,16,17];else if(key.startsWith('lifeL')||key.startsWith('lifeR'))pool=[3,11,16,17,18,19,20];}else if(motionPreset==='life-cilia'){if(key.startsWith('lifeL')||key.startsWith('lifeR'))pool=[8,11,12,13,18,19,20,21,22];else pool=[0,3,11,12,16,18];}else if(motionPreset==='life-arthro'){if(key.startsWith('lifeL')||key.startsWith('lifeR'))pool=[1,9,16,17,19,20,21,22];else if(key.startsWith('mass'))pool=[0,10,16,17];else pool=[1,9,16,17,18,20];}}let first=pick(r,pool),second=pick(r,pool);if(second===first&&pool.filter(v=>v!==first).length)second=pick(r,pool.filter(v=>v!==first));return [first,second,between(r,p.rate[0],p.rate[1]),between(r,p.amp[0],p.amp[1])]}
 function visibleParts(){if(!mesh)return [];const f=$('partGroup').value;return mesh.partKeys.map((key,i)=>({key,i,group:partCategory(key)})).filter(p=>f==='all'||p.group===f)}
 function applyMotionControls(){if(!mesh)return;for(let i=0;i<mesh.parts;i++){let key=mesh.partKeys[i],m=presetForPart(key,mesh.baseMotions[i]);if(partRotationEnabled.get(key)===false){for(let j=0;j<2;j++)if(ROTATIONAL_MODES.has(m[j]))m[j]+=100}mesh.motions.set(m,i*4)}if(!softwareMode){gl.useProgram(program);gl.uniform4fv(uniforms['uMotion[0]'],mesh.motions)}prevFrameKey='';renderPartControls()}
 function renderPartControls(){if(!mesh)return;const list=$('partList');list.replaceChildren();let count=0;for(const {key,i} of visibleParts()){const m=Array.from(mesh.motions.slice(i*4,i*4+2)).map(n=>n>=100?n-100:n),rotatable=m.some(v=>ROTATIONAL_MODES.has(v)),enabled=partRotationEnabled.get(key)!==false;const row=document.createElement('label');row.className='part-item'+(!rotatable?' inactive':'');const name=document.createElement('span');name.className='part-name';name.textContent=partLabel(key);const desc=document.createElement('span');desc.className='part-motion';desc.textContent=m.map(v=>MOTIONS[v]||'').join(' × ');const box=document.createElement('input');box.type='checkbox';box.checked=rotatable&&enabled;box.disabled=!rotatable;box.title=rotatable?'この部位の回転を切り替え':'回転運動を持たない部位';box.setAttribute('aria-label',partLabel(key)+' 回転');box.onchange=()=>{partRotationEnabled.set(key,box.checked);applyMotionControls()};row.append(name,desc,box);list.append(row);if(rotatable)count++}if(!list.children.length){const empty=document.createElement('div');empty.className='hint';empty.textContent='該当する部位がありません';list.append(empty)}$('rotationPartCount').textContent=count+'部位で回転可能'}
@@ -473,15 +554,17 @@ function frame(stamp){requestAnimationFrame(frame);let dt=lastTick?Math.min(.06,
  for(let [name,size,offset] of [['aPos',3,0],['aNormal',3,3],['aColor',3,6],['aRough',1,9],['aGlow',1,10],['aPart',1,11],['aTexture',1,12]]){let loc=attrs[name];if(loc>=0)gl.vertexAttribPointer(loc,size,gl.FLOAT,false,13*4,offset*4)}gl.drawArrays(gl.TRIANGLES,0,mesh.count)
 }
 
-function updateStats(r,b){$('modeL').textContent=NAMES[r.modes[0]];$('modeR').textContent=NAMES[r.modes[1]];$('relationship').textContent=RELATIONSHIPS[r.relation];$('fusionStat').textContent=Math.round(r.fusion*100)+'% / '+r.dist.toFixed(2);$('boolStat').textContent=`加算 + / 減算 ${r.csg[0]+r.csg[1]}箇所`;$('triangles').textContent=b.triangles.toLocaleString('ja-JP');$('frameSeed').textContent=r.seed;$('frameMeta').textContent=NAMES[r.modes[0]]+' × '+NAMES[r.modes[1]];$('keywordTags').innerHTML=r.keywords.map(w=>'<span class="tagword">'+w+'</span>').join('');$('motionCount').textContent=b.partMotions.length+'パーツ / 複合運動';$('motionInfo').textContent='質感：'+r.textures.map((ts,i)=>(i?'右':'左')+ts.map(t=>TEXTURES[t]).join('・')).join(' ／ ')+'。動き：'+b.partMotions.slice(0,4).map(m=>MOTIONS[m[0]]+'×'+MOTIONS[m[1]]).join('、')}
+function updateStats(r,b){$('modeL').textContent=NAMES[r.modes[0]];$('modeR').textContent=NAMES[r.modes[1]];$('relationship').textContent=(r.relationLabels||RELATIONSHIPS)[r.relation];$('fusionStat').textContent=Math.round(r.fusion*100)+'% / '+r.dist.toFixed(2);$('boolStat').textContent=`加算 + / 減算 ${r.csg[0]+r.csg[1]}箇所`;$('triangles').textContent=b.triangles.toLocaleString('ja-JP');$('frameSeed').textContent=r.seed;$('frameMeta').textContent=(r.profile==='lifeform'?'味覚生命体 · ':'')+(r.bodyPlan||NAMES[r.modes[0]]+' × '+NAMES[r.modes[1]]);$('keywordTags').innerHTML=[...(r.bodyPlan?[r.bodyPlan]:[]),...r.keywords].map(w=>'<span class="tagword">'+w+'</span>').join('');$('motionCount').textContent=b.partMotions.length+'パーツ / 複合運動';$('motionInfo').textContent='質感：'+r.textures.map((ts,i)=>(i?'右':'左')+ts.map(t=>TEXTURES[t]).join('・')).join(' ／ ')+'。動き：'+b.partMotions.slice(0,4).map(m=>MOTIONS[m[0]]+'×'+MOTIONS[m[1]]).join('、')}
 function toast(message){let t=$('toast');t.textContent=message;t.classList.add('show');clearTimeout(t._tm);t._tm=setTimeout(()=>t.classList.remove('show'),2300)}
-async function generate(seed){if(generating)return;generating=true;$('loading').classList.add('active');$('generate').disabled=true;$('same').disabled=true;$('seed').value=seed;await new Promise(done=>setTimeout(done,25));try{let sameSeed=current&&current.seed===seed;if(!sameSeed)partRotationEnabled=new Map();let r=makeRecipe(seed);let b=makeGeometry(r);current=r;upload(b);motionClock=0;prevFrameKey='';syncPalette(r);updateStats(r,b);setBackground(r.background);rotation={yaw:between(generator(seed,'camera'),-.7,.7),pitch:between(generator(seed,'cameraPitch'),-.3,.32)};initialRotation={...rotation};zoom=Math.max(6.7,r.dist*1.8+3.25);try{let u=new URL(location.href);u.searchParams.set('seed',seed);history.replaceState({},'',u)}catch(e){};toast('新しい味覚構造体を生成しました')}catch(err){console.error(err);toast('生成エラー：'+err.message)}finally{generating=false;$('loading').classList.remove('active');$('generate').disabled=false;$('same').disabled=false}}
+async function generate(seed){if(generating)return;generating=true;$('loading').classList.add('active');$('generate').disabled=true;$('same').disabled=true;$('seed').value=seed;await new Promise(done=>setTimeout(done,25));try{let sameSeed=current&&current.seed===seed;if(!sameSeed)partRotationEnabled=new Map();let r=makeRecipe(seed);let b=makeGeometry(r);current=r;upload(b);motionClock=0;prevFrameKey='';syncPalette(r);updateStats(r,b);setBackground(r.background);rotation={yaw:between(generator(seed,'camera'),-.7,.7),pitch:between(generator(seed,'cameraPitch'),-.3,.32)};initialRotation={...rotation};zoom=Math.max(6.7,r.dist*1.8+3.25);try{let u=new URL(location.href);u.searchParams.set('seed',seed);history.replaceState({},'',u)}catch(e){};toast(r.profile==='lifeform'?'新しい味覚生命体を生成しました':'新しい味覚構造体を生成しました')}catch(err){console.error(err);toast('生成エラー：'+err.message)}finally{generating=false;$('loading').classList.remove('active');$('generate').disabled=false;$('same').disabled=false}}
 function download(blob,name){let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
 function savePNG(){
  if(!mesh || !current)return;
  const source=$('glview'),out=document.createElement('canvas');
- out.width=source.width;out.height=source.height;
+ const scale=Math.max(1,parseInt($('exportScale')?.value||'2',10)||2);
+ out.width=source.width*scale;out.height=source.height*scale;
  const ctx=out.getContext('2d');
+ ctx.scale(scale,scale);
  const bg=window.getComputedStyle($('viewer')).backgroundImage;
  // Match the on-screen backdrop, and flatten the transparent WebGL layer into PNG.
  const palettes=[['#d8e2e7','#8b9ba6'],['#e7dacc','#b6a399'],['#d5dadd','#757a89'],['#dfded0','#a8b9a2'],['#c3cdd1','#647184']];
@@ -489,9 +572,11 @@ function savePNG(){
  const grad=ctx.createRadialGradient(out.width*.5,out.height*.35,0,out.width*.5,out.height*.35,Math.max(out.width,out.height)*.8);
  grad.addColorStop(0,cc[0]);grad.addColorStop(1,cc[1]);ctx.fillStyle=grad;ctx.fillRect(0,0,out.width,out.height);
  ctx.drawImage(source,0,0);
- out.toBlob(b=>{if(b)download(b,'flavor-structure-'+current.seed+'.png');else toast('PNGを保存できませんでした')},'image/png');
+ out.toBlob(b=>{if(b)download(b,'flavor-structure-'+current.seed+'-'+scale+'x.png');else toast('PNGを保存できませんでした')},'image/png');
 }
-function saveJSON(){if(!current)return;const payload={app:'Flavor Structure Lab prototype 0.9, smooth-shaded canvas renderer',created:new Date().toISOString(),palette:palette,recipe:current,animation:{clock:motionClock,playing:isPlaying,speed:motionSpeed,amplitude:motionAmplitude,rotationPower,ikPower,motionPreset,partRotationEnabled:Object.fromEntries(partRotationEnabled),textureStrength:textureLevel,shadingEnabled,shadingStrength,flatTextureOff}};download(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'flavor-structure-'+current.seed+'.json')}
+function saveJSON(){if(!current)return;const payload={app:'Flavor Structure Lab prototype 1.3, smooth-shaded canvas renderer with bilateral lifeform mode',created:new Date().toISOString(),palette:palette,recipe:current,animation:{clock:motionClock,playing:isPlaying,speed:motionSpeed,amplitude:motionAmplitude,rotationPower,ikPower,motionPreset,partRotationEnabled:Object.fromEntries(partRotationEnabled),textureStrength:textureLevel,shadingEnabled,shadingStrength,flatTextureOff,exportScale:parseInt($('exportScale')?.value||'2',10)}};download(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'flavor-structure-'+current.seed+'.json')}
+function syncUiLabels(){let labels={auto:'自動',paleo:'古生物 / カンブリア',molecular:'高分子 / 分子模型',microbe:'細胞 / 微生物',arthropod:'節足 / 殻 / 触手',membrane:'膜 / 葉状 / ローブ'};$('lifeBiasValue').textContent=labels[$('lifeBias').value]||'自動';$('symmetryValue').textContent=$('symmetry').value+'%';$('ambiguityValue').textContent=$('ambiguity').value+'%';$('exportScaleValue').textContent=$('exportScale').value+'×';}
+function applyLifePreset(name,regenNew=false){let conf=LIFE_PRESET_CONFIG[name];if(!conf)return;$('profile').value='lifeform';$('lifeBias').value=conf.lifeBias;$('symmetry').value=conf.symmetry;$('ambiguity').value=conf.ambiguity;$('theme').value=conf.theme;$('motionPreset').value=conf.motionPreset;motionPreset=conf.motionPreset;$('exportScale').value=String(conf.exportScale||2);shadingEnabled=conf.shading!==false;$('shading').checked=shadingEnabled;flatTextureOff=!!conf.flatTextureOff;$('flatTextureOff').checked=flatTextureOff;syncUiLabels();if(mesh)applyMotionControls();let seed=regenNew?newSeed():($('seed').value.trim()||newSeed());generate(seed);toast(conf.label+' を適用しました')}
 function renderSaved(){let list=$('savedList');$('savedCount').textContent=saved.length+'件';list.innerHTML='';saved.forEach((item,i)=>{let line=document.createElement('div');line.style='display:flex;align-items:center;gap:7px;border:1px solid #303d48;border-radius:8px;padding:5px;';let b=document.createElement('button');b.className='btn compact';b.style='flex:1;text-align:left';b.textContent=item.seed+' · '+item.colors.slice(0,3).join(' ');b.title='再現';b.onclick=()=>generate(item.seed);let d=document.createElement('button');d.className='btn compact';d.textContent='×';d.title='削除';d.onclick=()=>{saved.splice(i,1);persist()};line.append(b,d);list.append(line)})}
 function persist(){try{localStorage.setItem('flavorlab_favorites',JSON.stringify(saved))}catch(e){toast('ブラウザ保存が利用できません')}renderSaved()}
 function wire(){
@@ -503,13 +588,20 @@ function wire(){
  for(let [id,show,action] of [['motionSpeed','motionSpeedValue',v=>motionSpeed=v/100],['motionAmount','motionAmountValue',v=>motionAmplitude=v/100],['rotationPower','rotationPowerValue',v=>rotationPower=v/100],['ikPower','ikPowerValue',v=>ikPower=v/100],['surface','surfaceValue',v=>textureLevel=v/100],['shadingStrength','shadingStrengthValue',v=>shadingStrength=v/100],['gradient','gradientValue',v=>{}]]){
   $(id).oninput=()=>{let val=Number($(id).value);$(show).textContent=val+'%';action(val);prevFrameKey=''};
  }
+ $('symmetry').oninput=()=>{syncUiLabels();if(current&&$('profile').value==='lifeform')generate(current.seed)};
+ $('ambiguity').oninput=()=>{syncUiLabels();if(current&&$('profile').value==='lifeform')generate(current.seed)};
  $('motionPreset').onchange=()=>{motionPreset=$('motionPreset').value;applyMotionControls();toast('運動プリセットを切り替えました')};
+ $('exportScale').onchange=()=>{syncUiLabels()};
+ $('lifeBias').onchange=()=>{syncUiLabels();if(current&&$('profile').value==='lifeform')generate(current.seed)};
  $('shading').onchange=()=>{shadingEnabled=$('shading').checked;$('shadingStrength').disabled=!shadingEnabled;prevFrameKey='';toast(shadingEnabled?'陰影を有効にしました':'フラット表示に切り替えました')};
  $('flatTextureOff').onchange=()=>{flatTextureOff=$('flatTextureOff').checked;prevFrameKey='';toast(flatTextureOff?'フラット表示でテクスチャを無効化します':'フラット表示でテクスチャを残します')};
  $('partGroup').onchange=renderPartControls;
  $('rotAllOn').onclick=()=>setVisibleRotations(true);$('rotAllOff').onclick=()=>setVisibleRotations(false);
  $('gradient').onchange=()=>{if(current)generate(current.seed)};
  $('theme').onchange=()=>{if(current)generate(current.seed)};
+ $('profile').onchange=()=>{if(current)generate(current.seed)};
+ document.querySelectorAll('[data-life-preset]').forEach(btn=>btn.onclick=()=>applyLifePreset(btn.dataset.lifePreset,btn.dataset.lifePreset==='random'));
+ syncUiLabels();
 
  $('bookmark').onclick=()=>{if(!current)return;if(saved.some(s=>s.seed===current.seed)){toast('すでに保存されています');return}saved.unshift({seed:current.seed,colors:current.colors.slice(),rows:current.rows.slice()});saved=saved.slice(0,40);persist();toast('お気に入りに追加しました')};
  $('copyLink').onclick=async()=>{let url=location.href.split('?')[0]+'?seed='+encodeURIComponent(current.seed);try{await navigator.clipboard.writeText(url);toast('再現用リンクをコピーしました')}catch(e){prompt('このURLをコピーしてください',url)}};
