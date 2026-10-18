@@ -16,12 +16,19 @@ aside{z-index:3;overflow-y:auto;background:var(--panel);border-right:1px solid v
 .taglist{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.tagword{background:#243143;border:1px solid #3b5267;border-radius:99px;padding:5px 8px;color:#d2e9f2;font-size:11px}.motion-head{display:flex;justify-content:space-between;gap:8px;align-items:center}.motion-info{color:#93b0bb;font-size:11px;line-height:1.7;padding:7px 0}.controls-row{display:flex;gap:7px;margin-top:7px}.controls-row>*{flex:1}.label-small{font-size:11px;color:#b9cbd6;display:block;margin:9px 0 6px}.view-actions{flex-wrap:wrap;justify-content:flex-end}
 @media(max-width:800px){body{overflow:auto}.app{display:flex;flex-direction:column;height:auto;min-height:100dvh}.viewer{height:57dvh;min-height:340px;order:0}.side-inner{padding:17px 16px 28px}.logo{margin-bottom:12px}aside{order:1;overflow:visible;border-top:1px solid #394958;border-right:0}.topbar{top:12px;left:12px;right:12px}.bottom-bar{bottom:12px;left:12px;right:12px}.keys{font-size:10px;padding:7px 9px}.frameinfo{font-size:9px;padding:6px 9px}.view-actions{gap:4px}.iconbtn{padding:7px 9px}.palette-card{grid-template-columns:55px 1fr}.divider{margin:18px 0}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-</style>
+ .part-list{max-height:245px;overflow-y:auto;display:grid;gap:4px;padding:4px 0 7px;scrollbar-width:thin}
+ .part-item{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid #2e3946;border-radius:7px;padding:6px 8px;font-size:11px;background:#111923}
+ .part-item .part-name{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .part-item .part-motion{color:#92a4b5;font-size:10px;max-width:48%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .part-item input{width:18px;height:18px;accent-color:#a9e6ca;cursor:pointer;flex:none}
+ .part-item input:disabled{opacity:.3;cursor:default}
+ .part-item.inactive{opacity:.55}
+ </style>
 </head>
 <body>
 <div class="app">
 <aside><div class="side-inner">
- <div class="logo"><div class="logo-symbol">◈</div><div><div class="pre">GENERATIVE TASTE ARCHITECTURE</div><h1>FLAVOR STRUCTURE LAB <span style="color:#93a7ae;font-size:10px;font-weight:600">β</span></h1></div></div>
+ <div class="logo"><div class="logo-symbol">◈</div><div><div class="pre">GENERATIVE TASTE ARCHITECTURE · v0.5</div><h1>FLAVOR STRUCTURE LAB <span style="color:#93a7ae;font-size:10px;font-weight:600">β</span></h1></div></div>
  <div class="eyebrow">01 / GENERATION</div>
  <div class="heading"><b>シードから生成</b><span class="mini">再現可能</span></div>
  <div class="field"><input id="seed" type="text" inputmode="numeric" spellcheck="false" aria-label="シード番号" maxlength="40" placeholder="シードを入力"><button class="btn compact" id="same" title="同じシードで再生成">再現</button></div>
@@ -49,11 +56,20 @@ aside{z-index:3;overflow-y:auto;background:var(--panel);border-right:1px solid v
  <div class="eyebrow">04 / LIVING MOTION</div>
  <div class="heading"><b>各パーツが独立して動く</b><span class="mini" id="motionCount">—</span></div>
  <div class="controls-row"><button class="btn primary" id="playMotion" aria-pressed="true">⏸ 一時停止</button><button class="btn" id="restartMotion">↺ 時間リセット</button></div>
+ <div class="slider-wrap"><div class="sliderlabel"><span>動きのプリセット</span><span class="mini">形は維持・動きだけ変更</span></div><select id="motionPreset" aria-label="動きのプリセット"><option value="random">完全ランダム</option><option value="organic">有機・呼吸</option><option value="mechanical">機械・軸回転</option><option value="viscous">粘性・融解</option><option value="delicate">繊細・静寂</option><option value="energetic">活発・破裂</option></select></div>
  <div class="slider-wrap"><div class="sliderlabel"><span>運動速度</span><span id="motionSpeedValue">100%</span></div><input type="range" min="0" max="250" value="100" id="motionSpeed"></div>
  <div class="slider-wrap"><div class="sliderlabel"><span>運動強度</span><span id="motionAmountValue">75%</span></div><input type="range" min="0" max="160" value="75" id="motionAmount"></div>
+ <div class="slider-wrap"><div class="sliderlabel"><span>部位別の回転強度</span><span id="rotationPowerValue">100%</span></div><input type="range" min="0" max="200" value="100" id="rotationPower" aria-label="部位別の回転強度"></div>
+ <div class="slider-wrap"><div class="sliderlabel"><span>IK・多関節の強度</span><span id="ikPowerValue">100%</span></div><input type="range" min="0" max="200" value="100" id="ikPower" aria-label="IKと多関節の強度"></div>
  <div class="slider-wrap"><div class="sliderlabel"><span>質感の強調</span><span id="surfaceValue">70%</span></div><input type="range" min="0" max="100" value="70" id="surface"></div>
  <div class="slider-wrap"><div class="sliderlabel"><span>色面のグラデーション</span><span id="gradientValue">75%</span></div><input type="range" min="0" max="100" value="75" id="gradient"></div>
  <div class="motion-info" id="motionInfo">脈動・回転・融解などを複数合成。時間を止めれば同一シードの同一フレームを再現できます。</div>
+ <details class="disclosure" id="partTuning"><summary>部位ごとの回転ON/OFF <span class="mini" id="rotationPartCount">—</span></summary><div class="inside">
+   <div class="slider-wrap"><label for="partGroup" class="sliderlabel">表示する部位</label><select id="partGroup" aria-label="部位の分類"><option value="all">全体</option><option value="left">左側</option><option value="right">右側</option><option value="fusion">融合部</option></select></div>
+   <div class="controls-row"><button class="btn compact" id="rotAllOn">表示中を全ON</button><button class="btn compact" id="rotAllOff">表示中を全OFF</button></div>
+   <div id="partList" class="part-list" aria-label="部位別回転スイッチ"></div>
+   <div class="hint">回転モーションを持つ部位だけ切り替わります。IK・脈動など、回転以外の動きは維持されます。</div>
+ </div></details>
  <div style="height:12px"></div>
  <details class="disclosure" id="tuning"><summary>詳細設定（通常はすべてランダム）</summary><div class="inside">
  <label class="switchrow"><input type="checkbox" id="override">融合度と複雑度を手動指定</label>
@@ -82,12 +98,21 @@ const DEFAULT_PALETTE = [["#762200", "#603E00", "#926200", "#7A783F", "#006837",
 const NAMES = ['密度の高い塊','分岐骨格','斜交する板層','不規則な尖塔','ねじれた環状体','中空の殻','断層状の塊','伸展する腕','鱗状の積層','ねじれた薄壁','流線形の滴','扇状の板群','櫛歯状の稜線','結晶の群生','多房状の塊','割れた弧の束','細胞状の分岐','板と筋の格子','縫合した瘤','折紙状の襞','塊と細い根','斜めの衝突体','不等辺の多面体','低確率プリミティブ'];
 const THEMES={random:['リズム','重量感','強弱','陰陽','テンポ','スピード','スロー','展開','折込','緊張','弛緩','密度','開放','圧縮','伸張','浮遊','沈降','反復','逸脱','侵食','発酵','融和','対立','断裂','連結','拍動','滲出','蓄積','拡散','収束','凝固','溶融','呼吸','跳躍','残響','余韻','粘着','増殖','膨張','しなり','屈曲','ねじれ','断続','停滞','静寂','速度差','重力反転','非対称','均衡','ゆらぎ','結晶化','遅延','反転','断熱','浸透','空洞','硬度差','不協和','濃淡','圧力','振幅','渦流','崩壊','再構築'],rhythm:['リズム','拍動','反復','テンポ','振幅','断続','呼吸','速度差'],gravity:['重量感','沈降','圧縮','蓄積','密度','硬度差','停滞','低速'],opposition:['陰陽','対立','均衡','強弱','反転','硬度差','濃淡','非対称'],growth:['展開','増殖','伸張','分岐','拡散','跳躍','浮遊','開放'],fold:['折込','屈曲','しなり','圧縮','収束','重層','渦流','ねじれ'],dissolve:['融解','滲出','浸透','発酵','凝固','余韻','流動','柔軟'],rupture:['破裂','断裂','崩壊','反転','跳躍','逸脱','再構築','高速度'],quiet:['静寂','残響','余韻','停滞','均衡','スロー','減衰','呼吸'],tension:['緊張','弛緩','対立','収束','伸張','硬度差','圧力','非対称'],chaos:['混沌','逸脱','断続','不協和','無秩序','崩壊','非対称','増殖'],fluid:['流動','粘着','融解','屈曲','伸縮','浸透','しなり','渦流']};
 const TEXTURES=['石粒','絹面','綿毛','鏡面','無光沢','繊維','砂粒','亀裂','陶肌','ゴム','毛羽立ち','濡れ肌','炭化','結晶','金属刷毛','粉末'];
-const MOTIONS=['脈動','自転','伸縮','波打ち','破裂','融解','粘着','折込','微振動','ねじれ','収縮','浮遊','伝播','渦流','凝固','分岐'];
-const PART_LIMIT=40;
+const MOTIONS=['脈動','自転','伸縮','波打ち','破裂','融解','粘着','折込','微振動','ねじれ','収縮','浮遊','伝播','渦流','凝固','分岐','IK屈曲','多関節','腱引き','局所回転X','局所回転Y','局所回転Z','軌道回転'];
+let PART_LIMIT=64;
+const ROTATIONAL_MODES=new Set([1,9,19,20,21,22]);
+const IK_MODES=new Set([16,17,18]);
+const MOTION_PRESETS={
+ organic:{modes:[0,3,5,6,7,9,10,11,12,16,17,18,19,20],rate:[.45,1.0],amp:[.035,.15]},
+ mechanical:{modes:[1,8,9,14,17,19,20,21,22],rate:[.65,1.35],amp:[.02,.11]},
+ viscous:{modes:[0,3,5,6,7,10,12,13,16,17,18],rate:[.16,.60],amp:[.05,.19]},
+ delicate:{modes:[0,3,8,11,12,16,18,19,20,21],rate:[.10,.42],amp:[.009,.055]},
+ energetic:{modes:[0,1,4,8,9,12,14,17,19,20,21,22],rate:[.8,1.7],amp:[.07,.21]}
+};
 const RELATIONSHIPS = ['深く貫入','滑らかに融合','梁による接合','相互に巻きつく','嵌合・重合','組み合わさる','圧縮・食い込み'];
 const $ = (id)=>document.getElementById(id);
 let palette=DEFAULT_PALETTE.map(a=>a.slice());
-let current=null, mesh=null, gl=null, ctx2d=null, softwareMode=false, prevFrameKey='', program=null, uniforms={}, attrs={}, inputPointer=null, rotation={yaw:-0.37,pitch:0.18}, initialRotation={yaw:-0.37,pitch:0.18}, zoom=10.5, auto=false, generating=false, saved=[], isPlaying=!matchMedia('(prefers-reduced-motion: reduce)').matches, motionClock=0, lastTick=0, textureLevel=.70, motionAmplitude=.75, motionSpeed=1;
+let current=null, mesh=null, gl=null, ctx2d=null, softwareMode=false, prevFrameKey='', program=null, uniforms={}, attrs={}, inputPointer=null, rotation={yaw:-0.37,pitch:0.18}, initialRotation={yaw:-0.37,pitch:0.18}, zoom=10.5, auto=false, generating=false, saved=[], isPlaying=!matchMedia('(prefers-reduced-motion: reduce)').matches, motionClock=0, lastTick=0, textureLevel=.70, motionAmplitude=.75, motionSpeed=1, rotationPower=1, ikPower=1, motionPreset='random', partRotationEnabled=new Map();
 try{saved=JSON.parse(localStorage.getItem('flavorlab_favorites')||'[]')}catch(e){}
 function hashStr(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
 function generator(seed,namespace){let a=hashStr(seed+'|'+namespace)||1;return ()=>{a+=0x6D2B79F5;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296}}
@@ -179,15 +204,17 @@ function buildSDFRecipe(r,side){const rand=generator(r.seed,'shape'+side),mode=r
 }
 // GPU vertex format: position3, normal3, RGB3, roughness1, emission1, part-id1, texture-id1 = 13 floats
 class Builder{
- constructor(recipe){this.a=[];this.triangles=0;this.part=0;this.texture=0;this.partMotions=[];this.partPivots=[];this.recipe=recipe}
+ constructor(recipe){this.a=[];this.triangles=0;this.part=0;this.texture=0;this.partMotions=[];this.partPivots=[];this.partKeys=[];this.recipe=recipe}
  beginPart(pivot,key){let idx=this.partMotions.length;if(idx>=PART_LIMIT){this.part=idx%PART_LIMIT;return}
   let rnd=generator(this.recipe.seed,'motion|'+key),sem=this.recipe.semantic;
   let primary=int(rnd,0,MOTIONS.length-1),secondary=int(rnd,0,MOTIONS.length-1);
-  if(sem.fluid&&rnd()<.5)primary=pick(rnd,[5,6,12,13]);
-  if(sem.fold&&rnd()<.4)primary=pick(rnd,[7,9,10]);
-  if(sem.weight&&rnd()<.45)primary=pick(rnd,[0,10,11]);
-  let rate=between(rnd,.14,1.65)*(sem.quiet?.45:1)*(sem.energetic?1.35:1),amp=between(rnd,.05,.32)*(sem.weight?.72:1);
-  this.part=idx;this.partMotions.push([primary,secondary,rate,amp]);this.partPivots.push([pivot[0],pivot[1],pivot[2],between(rnd,-3.14,3.14)]);
+  if(sem.fluid&&rnd()<.56)primary=pick(rnd,[5,6,12,13,18,22]);
+  if(sem.fold&&rnd()<.45)primary=pick(rnd,[7,9,10,16,17,19,20]);
+  if(sem.weight&&rnd()<.48)primary=pick(rnd,[0,10,11,16,20]);
+  if(rnd()<.28)secondary=pick(rnd,[8,12,16,17,18,19,20,21,22]);
+  if(rnd()<.34&&!ROTATIONAL_MODES.has(primary)&&!ROTATIONAL_MODES.has(secondary))secondary=pick(rnd,[19,20,21,22]);
+  let rate=between(rnd,.12,1.12)*(sem.quiet?.55:1)*(sem.energetic?1.18:1),amp=between(rnd,.018,.16)*(sem.weight?.74:1)*(sem.energetic?1.05:1);
+  this.part=idx;this.partKeys.push(key);this.partMotions.push([primary,secondary,rate,amp]);this.partPivots.push([pivot[0],pivot[1],pivot[2],between(rnd,-3.14,3.14)]);
  }
  setTexture(t){this.texture=t}
  v(p,n,col,mat){this.a.push(p[0],p[1],p[2],n[0],n[1],n[2],col[0],col[1],col[2],mat[0],mat[1],this.part,this.texture)}
@@ -219,51 +246,69 @@ function tube(builder,path,radii,col,material,sides=7){let mat=[material===1?.13
 function bezier(a,b,c,d,t){let u=1-t;return add(add(mul(a,u*u*u),mul(b,3*u*u*t)),add(mul(c,3*u*t*t),mul(d,t*t*t)))}
 function ribbon(builder,path,width,col,matType,phase){let mat=[matType===1?.13:.48,.007];for(let i=0;i<path.length-1;i++){let a=path[i],b=path[i+1],av=normalize(sub(path[Math.min(path.length-1,i+1)],path[Math.max(0,i-1)])),twist=i*.25+phase,uu=normalize(cross(av,[Math.sin(twist),Math.cos(twist),.45]));if(length3(uu)<.01)uu=[1,0,0];let av2=normalize(sub(path[Math.min(path.length-1,i+2)],path[i])),vv=normalize(cross(av2,[Math.sin(twist+.25),Math.cos(twist+.25),.45]));let w1=width*(.6+.4*Math.sin(Math.PI*i/(path.length-1))),w2=width*(.6+.4*Math.sin(Math.PI*(i+1)/(path.length-1))),p1=add(a,mul(uu,w1)),p2=sub(a,mul(uu,w1)),p3=add(b,mul(vv,w2)),p4=sub(b,mul(vv,w2));builder.tri(p1,p2,p3,col,mat);builder.tri(p2,p4,p3,col,mat)}}
 function extraDetails(builder,recipe,side){let r=generator(recipe.seed,'details'+side),off=[side?recipe.dist/2:-recipe.dist/2,between(r,-.15,.15),0],rot=recipe.rotations[side],colors=recipe.colors.slice(side*3,side*3+3).map(hex2rgb),complexity=recipe.complexity;
- const n=int(r,2,Math.round(3+complexity*9));for(let j=0;j<n;j++){let type=int(r,0,12);let a=[between(r,-.8,.8),between(r,-.85,.85),between(r,-.65,.65)],b=[between(r,-1.2,1.2),between(r,-1.2,1.2),between(r,-1.2,1.2)],points=[];if(type<=1){points=[a,b]}else{let m=[between(r,-1,1),between(r,-1,1),between(r,-1,1)];points=[a,m,b]}
+ const n=int(r,4,Math.round(7+complexity*18));for(let j=0;j<n;j++){let type=int(r,0,16);let a=[between(r,-.8,.8),between(r,-.85,.85),between(r,-.65,.65)],b=[between(r,-1.2,1.2),between(r,-1.2,1.2),between(r,-1.2,1.2)],points=[];if(type<=1){points=[a,b]}else{let m=[between(r,-1,1),between(r,-1,1),between(r,-1,1)];points=[a,m,b]}
  let world=points.map(p=>add(rotatePoint(p,rot),off));builder.beginPart(world[Math.floor(world.length/2)],'detail'+side+'|'+j);let ci=int(r,0,2);builder.setTexture(recipe.textures[side][ci]);let color=colors[ci],radius=type<=1?between(r,.035,.16):between(r,.025,.08);if(type===4||type===10)ribbon(builder,world,between(r,.14,.54),color,recipe.material[side],between(r,0,6));
  else if(type===6||type===7){let c=world[Math.floor(world.length/2)],v1=add(c,rotatePoint([between(r,.1,.7),between(r,-.6,.6),between(r,-.4,.4)],rot)),v2=add(c,rotatePoint([between(r,-.4,.4),between(r,.1,.7),between(r,-.6,.6)],rot));builder.tri(world[0],v1,v2,color,[.65,.012]);if(type===7)builder.tri(v1,world[world.length-1],v2,color,[.7,.01]);}
  else if(type===8||type===9){let hub=world[Math.floor(world.length/2)];for(let q=0;q<int(r,3,8);q++){let tip=add(hub,[between(r,-1,1),between(r,-1,1),between(r,-1,1)]);tube(builder,[hub,tip],[between(r,.035,.11),.002],color,recipe.material[side],5)}}
  else if(type===11){let c=world[Math.floor(world.length/2)];for(let z=0;z<5;z++){let an=z*Math.PI*2/5,bn=(z+1)*Math.PI*2/5,a=add(c,[Math.cos(an)*.3,Math.sin(an)*.3,between(r,-.1,.1)]),b=add(c,[Math.cos(bn)*.3,Math.sin(bn)*.3,between(r,-.1,.1)]);builder.tri(c,a,b,color,[.25,.1])}}
  else if(type===12){let c=world[0],d=world[world.length-1],wing=add(c,rotatePoint([between(r,-.7,.7),between(r,-.6,.6),between(r,-.7,.7)],rot));builder.tri(c,d,wing,color,[.38,.08]);builder.tri(d,add(d,[.1,-.2,.2]),wing,color,[.38,.08])}
+ else if(type===13){let hub=world[Math.floor(world.length/2)],arms=int(r,3,6);for(let q=0;q<arms;q++){let ang=q*Math.PI*2/arms,tip=add(hub,rotatePoint([Math.cos(ang)*between(r,.25,.85),Math.sin(ang)*between(r,.18,.72),between(r,-.22,.22)],rot));tube(builder,[hub,tip],[between(r,.02,.06),.003],color,recipe.material[side],4)}}
+ else if(type===14){let base=world[0],mid=world[Math.floor(world.length/2)],tip=world[world.length-1];ribbon(builder,[base,mid,tip],between(r,.08,.22),color,recipe.material[side],between(r,0,6));}
+ else if(type===15){let c=world[Math.floor(world.length/2)],w=between(r,.12,.42),h=between(r,.08,.32),z=between(r,.12,.38);let p1=add(c,rotatePoint([-w,-h,-z],rot)),p2=add(c,rotatePoint([w,-h,-z],rot)),p3=add(c,rotatePoint([w,h,z],rot)),p4=add(c,rotatePoint([-w,h,z],rot));builder.tri(p1,p2,p3,color,[.55,.02]);builder.tri(p1,p3,p4,color,[.55,.02])}
+ else if(type===16){let hub=world[Math.floor(world.length/2)],tip=add(hub,rotatePoint([between(r,-.55,.55),between(r,-.55,.55),between(r,-.55,.55)],rot));tube(builder,[world[0],hub,tip],[between(r,.03,.11),between(r,.02,.08),.002],color,recipe.material[side],int(r,3,6))}
  else tube(builder,world,world.map((p,i)=>i===0||i===world.length-1?radius*.7:radius),color,recipe.material[side],int(r,4,8));}
 }
-function connectors(builder,recipe){let r=generator(recipe.seed,'connectors'),d=recipe.dist,le=[-d/2,0,0],ri=[d/2,0,0],c1=recipe.colors.slice(0,3).map(hex2rgb),c2=recipe.colors.slice(3).map(hex2rgb),rel=recipe.relation,n=rel===2?int(r,4,7):rel===6?int(r,3,5):int(r,2,5);
+function connectors(builder,recipe){let r=generator(recipe.seed,'connectors'),d=recipe.dist,le=[-d/2,0,0],ri=[d/2,0,0],c1=recipe.colors.slice(0,3).map(hex2rgb),c2=recipe.colors.slice(3).map(hex2rgb),rel=recipe.relation,n=rel===2?int(r,8,13):rel===6?int(r,6,10):int(r,4,9);
  for(let i=0;i<n;i++){let start=add(le,[between(r,.25,.75),between(r,-.65,.65),between(r,-.6,.6)]),end=add(ri,[between(r,-.75,-.25),between(r,-.65,.65),between(r,-.6,.6)]);
  const sideA=pick(r,c1),sideB=pick(r,c2),cy=between(r,-.45,.45),cz=between(r,-.6,.6),bend=between(r,-1.5,1.5)*(rel===3?1.7:1),b=[-d*.13,cy+bend*.5,cz],c=[d*.13,cy-bend*.5,cz+bend*.2],len=16,path=Array.from({length:len},(_,j)=>bezier(start,b,c,end,j/(len-1)));
  builder.beginPart([0,cy,cz],'connector|'+i);builder.setTexture(recipe.textures[i%2][int(r,0,2)]);if(rel===2||rel===4){const p=[start,end],rad=[between(r,.04,.18),between(r,.04,.18)];tube(builder,p,rad,sideA,1,int(r,4,7))}
  else if(rel===6){ribbon(builder,path,between(r,.19,.45),sideA,1,between(r,0,7))}
  else {let thickness=between(r,.07,.28)*(rel===1?1.7:1);let rad=path.map((p,j)=>thickness*(.65+.35*Math.sin(j/(len-1)*Math.PI)));tube(builder,path.slice(0,8),rad.slice(0,8),sideA,0,int(r,6,11));tube(builder,path.slice(7),rad.slice(7),sideB,1,int(r,6,11))}
  }
- if(rel===0||rel===4||rel===5){let col=pick(r,c1),col2=pick(r,c2);for(let i=0;i<int(r,1,3);i++){builder.beginPart([0,0,0],'connector|joint|'+i);builder.setTexture(recipe.textures[i%2][int(r,0,2)]);let a=[between(r,-.45,-.05),between(r,-.6,.6),between(r,-.5,.5)],b=[between(r,.1,.5),between(r,-.6,.6),between(r,-.5,.5)],rad=between(r,.17,.35);tube(builder,[a,b],[rad,rad*.7],i%2?col:col2,1,7)}}
+ if(rel===0||rel===4||rel===5){let col=pick(r,c1),col2=pick(r,c2);for(let i=0;i<int(r,2,5);i++){builder.beginPart([0,0,0],'connector|joint|'+i);builder.setTexture(recipe.textures[i%2][int(r,0,2)]);let a=[between(r,-.45,-.05),between(r,-.6,.6),between(r,-.5,.5)],b=[between(r,.1,.5),between(r,-.6,.6),between(r,-.5,.5)],rad=between(r,.17,.35);tube(builder,[a,b],[rad,rad*.7],i%2?col:col2,1,7)}}
 }
 function makeGeometry(recipe){let builder=new Builder(recipe);let N=recipe.complexity>.74?35:recipe.complexity>.46?32:28;for(let side=0;side<2;side++){let shape=buildSDFRecipe(recipe,side),rng=generator(recipe.seed,'mesh'+side),offset=[(side?1:-1)*recipe.dist/2,0,0],colors=recipe.colors.slice(side*3,side*3+3).map(hex2rgb);builder.beginPart(offset,'mass'+side);meshField(builder,shape.sdf,offset,recipe.rotations[side],colors,rng,N,recipe.material[side],recipe,side);extraDetails(builder,recipe,side)}connectors(builder,recipe);return builder}
 const vs=`
 precision highp float;
 attribute vec3 aPos;attribute vec3 aNormal;attribute vec3 aColor;attribute float aRough;attribute float aGlow;attribute float aPart;attribute float aTexture;
-uniform mat4 uView;uniform mat4 uProj;uniform float uTime;uniform float uIntensity;
-uniform vec4 uMotion[40];uniform vec4 uPivot[40];
+uniform mat4 uView;uniform mat4 uProj;uniform float uTime;uniform float uIntensity;uniform float uRotationPower;uniform float uIKPower;
+uniform vec4 uMotion[64];uniform vec4 uPivot[64];
 varying vec3 vNormal;varying vec3 vColor;varying vec3 vWorld;varying float vRough;varying float vGlow;varying float vTexture;
 vec3 movePart(vec3 p,float typ,float tm,float a,float phase){
- float w=sin(tm*6.283185+phase),w2=sin(tm*3.17+phase*1.3);
- if(typ<.5)return p*(1.0+a*w);
- if(typ<1.5){float t=a*tm*1.5,co=cos(t),si=sin(t);return vec3(co*p.x-si*p.z,p.y,si*p.x+co*p.z);}
- if(typ<2.5)return p*(vec3(1.0)+a*w*vec3(1.5,.4,1.1));
- if(typ<3.5)return p+vec3(sin(tm*3.0+p.y*4.0),cos(tm*2.0+p.z*5.0),sin(tm*2.3+p.x*3.0))*a*.48;
- if(typ<4.5){float burst=pow(max(0.0,w),5.0);return p+normalize(p+vec3(.001))*a*burst*3.8;}
- if(typ<5.5)return p+vec3(a*.16*w,-a*(.5+.5*w)*(.5+abs(p.x)),a*.24*sin(tm*1.8+p.y*3.0));
- if(typ<6.5)return vec3(p.x-a*.38*sin(tm*2.0+p.y*2.0),p.y,p.z-a*.34*sin(tm*2.2+p.x*3.0));
- if(typ<7.5)return vec3(p.x+a*sin(p.y*2.0+tm)*.6,p.y,p.z+a*cos(p.x*2.0-tm)*.5);
- if(typ<8.5)return p+a*.19*vec3(sin(tm*18.0+p.y*20.0),sin(tm*16.0+p.z*17.0),sin(tm*15.0+p.x*19.0));
- if(typ<9.5){float th=a*sin(tm+p.y*2.5),co=cos(th),si=sin(th);return vec3(co*p.x-si*p.z,p.y,si*p.x+co*p.z);}
- if(typ<10.5)return p*(1.0-a*(.5+.5*w)*.65);
- if(typ<11.5)return p+vec3(a*.24*w,a*.55*w2,a*.15*w);
- if(typ<12.5)return p+normalize(p+vec3(.001))*a*.45*sin(tm*3.0-length(p)*7.0);
- if(typ<13.5)return p+vec3(-p.z,0.0,p.x)*a*.28*sin(tm*1.4+p.y);
- if(typ<14.5)return p+normalize(p+vec3(.01))*a*.2*step(.75,w);
- return p+vec3(p.y*a*.6*w,p.z*a*.4*w,p.x*a*.35*w);
+ if(typ>=100.0)return p;
+ if(abs(typ-1.0)<.5||abs(typ-9.0)<.5||(typ>=18.5&&typ<22.5))a*=uRotationPower;
+ if(typ>=15.5&&typ<18.5)a*=uIKPower;
+ float w=sin(tm*6.283185+phase),w2=sin(tm*3.17+phase*1.3),w3=sin(tm*1.73+phase*2.1);
+ float distal=clamp(length(p)*0.62,0.0,1.0);
+ float chain=smoothstep(0.02,1.0,distal);
+ float tip=chain*chain;
+ if(typ<.5)return p*(1.0+a*w*(0.16+0.24*chain));
+ if(typ<1.5){float t=a*tm*.72*(0.35+0.65*chain),co=cos(t),si=sin(t);return vec3(co*p.x-si*p.z,p.y,si*p.x+co*p.z);} 
+ if(typ<2.5)return p*(vec3(1.0)+a*w*vec3(.28,.12,.22)*(0.3+0.7*chain));
+ if(typ<3.5)return p+vec3(sin(tm*2.6+p.y*3.0),cos(tm*1.9+p.z*4.1),sin(tm*2.1+p.x*2.8))*a*.12*(0.15+chain);
+ if(typ<4.5){float burst=pow(max(0.0,w),6.0);return p+normalize(p+vec3(.001))*a*burst*(0.18+0.85*tip);} 
+ if(typ<5.5)return p+vec3(a*.04*w,-a*(.08+.14*(.5+.5*w))*(0.2+distal),a*.06*sin(tm*1.3+p.y*2.2));
+ if(typ<6.5)return vec3(p.x-a*.16*sin(tm*1.8+p.y*2.0)*(0.2+chain),p.y,p.z-a*.14*sin(tm*1.9+p.x*2.3)*(0.2+tip));
+ if(typ<7.5)return vec3(p.x+a*sin(p.y*1.4+tm)*.14*(0.25+chain),p.y,p.z+a*cos(p.x*1.8-tm)*.11*(0.25+tip));
+ if(typ<8.5)return p+a*.045*vec3(sin(tm*12.0+p.y*10.0),sin(tm*11.0+p.z*12.0),sin(tm*13.0+p.x*11.0));
+ if(typ<9.5){float th=a*sin(tm+p.y*1.6)*(.3+.7*chain),co=cos(th),si=sin(th);return vec3(co*p.x-si*p.z,p.y,si*p.x+co*p.z);} 
+ if(typ<10.5)return p*(1.0-a*(.08+.20*(.5+.5*w))*(0.2+chain));
+ if(typ<11.5)return p+vec3(a*.08*w,a*.18*w2,a*.05*w3)*(0.3+0.7*chain);
+ if(typ<12.5)return p+normalize(p+vec3(.001))*a*.14*sin(tm*2.4-length(p)*6.0)*(0.2+tip);
+ if(typ<13.5)return p+vec3(-p.z,0.0,p.x)*a*.08*sin(tm*1.1+p.y)*(0.25+chain);
+ if(typ<14.5)return p+normalize(p+vec3(.01))*a*.07*step(.78,w)*(0.2+tip);
+ if(typ<15.5)return p+vec3(p.y*a*.16*w,p.z*a*.11*w2,p.x*a*.08*w3)*(0.15+chain);
+ if(typ<16.5){float bend=a*(0.22+0.78*tip)*sin(tm*1.2+phase);float co=cos(bend),si=sin(bend);return vec3(p.x,p.y*co-p.z*si,p.y*si+p.z*co);} 
+ if(typ<17.5){float t1=a*(0.10+0.55*chain)*sin(tm*1.5+phase),t2=a*(0.05+0.35*tip)*sin(tm*2.1+phase*1.7);float c1=cos(t1),s1=sin(t1),c2=cos(t2),s2=sin(t2);vec3 q=vec3(p.x*c1-p.z*s1,p.y,p.x*s1+p.z*c1);return vec3(q.x,q.y*c2-q.z*s2,q.y*s2+q.z*c2);} 
+ if(typ<18.5)return p+vec3(a*.03*sin(tm*5.0+p.y*4.0),a*.02*sin(tm*7.0+p.z*4.0),a*.03*sin(tm*6.0+p.x*5.0))*(0.2+0.8*tip);
+ if(typ<19.5){float th=a*(0.12+0.48*chain)*sin(tm*1.9+phase);float c=cos(th),s=sin(th);return vec3(p.x,p.y*c-p.z*s,p.y*s+p.z*c);} 
+ if(typ<20.5){float th=a*(0.12+0.54*chain)*sin(tm*1.6+phase*1.2),c=cos(th),s=sin(th);return vec3(p.x*c-p.z*s,p.y,p.x*s+p.z*c);} 
+ if(typ<21.5){float th=a*(0.10+0.46*chain)*sin(tm*2.1+phase*0.8),c=cos(th),s=sin(th);return vec3(p.x*c-p.y*s,p.x*s+p.y*c,p.z);} 
+ if(typ<22.5){float orbit=a*(0.05+0.22*chain);return p+vec3(cos(tm*1.35+phase),sin(tm*1.9+phase*0.7),sin(tm*1.1+phase))*orbit*(0.2+0.8*tip);} 
+ return p;
 }
 void main(){
- int id=int(clamp(floor(aPart+.5),0.0,39.0));vec4 m=uMotion[id],pv=uPivot[id];vec3 p=aPos-pv.xyz;
+ int id=int(clamp(floor(aPart+.5),0.0,63.0));vec4 m=uMotion[id],pv=uPivot[id];vec3 p=aPos-pv.xyz;
  float tm=uTime*m.z;float amp=m.w*uIntensity; p=movePart(p,m.x,tm,amp,pv.w);p=movePart(p,m.y,tm*.67+.23,amp*.55,pv.w+1.3);
  vec3 world=p+pv.xyz;
  vNormal=aNormal;vColor=aColor;vWorld=world;vRough=aRough;vGlow=aGlow;vTexture=aTexture;
@@ -312,24 +357,61 @@ function shader(g,kind,source){let s=g.createShader(kind);g.shaderSource(s,sourc
 function matPerspective(fov,aspect,near,far){let f=1/Math.tan(fov/2),o=new Float32Array(16);o[0]=f/aspect;o[5]=f;o[10]=(far+near)/(near-far);o[11]=-1;o[14]=(2*far*near)/(near-far);return o}
 function lookAt(eye,target,up){let z=normalize(sub(eye,target)),x=normalize(cross(up,z)),y=cross(z,x);return new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dot(x,eye),-dot(y,eye),-dot(z,eye),1])}
 function setupGL(){const canvas=$('glview');gl=canvas.getContext('webgl',{alpha:true,antialias:true,preserveDrawingBuffer:true,depth:true})||canvas.getContext('experimental-webgl');if(!gl){softwareMode=true;ctx2d=canvas.getContext('2d',{alpha:true});document.querySelector('.tag').innerHTML='<span class="dot"></span> LIVE 3D · CANVAS';requestAnimationFrame(frame);return}
- try{program=gl.createProgram();gl.attachShader(program,shader(gl,gl.VERTEX_SHADER,vs));gl.attachShader(program,shader(gl,gl.FRAGMENT_SHADER,fs));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));gl.useProgram(program)}catch(err){
+ try{const limit=gl.getParameter(gl.MAX_VERTEX_UNIFORM_VECTORS)||128;
+ PART_LIMIT=Math.max(24,Math.min(64,Math.floor((limit-18)/2)));
+ const source=vs.replaceAll('uMotion[64]','uMotion['+PART_LIMIT+']').replaceAll('uPivot[64]','uPivot['+PART_LIMIT+']').replace('63.0));',''+(PART_LIMIT-1)+'.0));');
+ program=gl.createProgram();gl.attachShader(program,shader(gl,gl.VERTEX_SHADER,source));gl.attachShader(program,shader(gl,gl.FRAGMENT_SHADER,fs));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));gl.useProgram(program)}catch(err){
  console.warn('WebGL shader unavailable; using Canvas renderer',err);let newCanvas=document.createElement('canvas');newCanvas.id='glview';newCanvas.setAttribute('aria-label','ドラッグで回転できる3D構造体');canvas.replaceWith(newCanvas);gl=null;softwareMode=true;ctx2d=newCanvas.getContext('2d',{alpha:true});document.querySelector('.tag').innerHTML='<span class="dot"></span> LIVE 3D · CANVAS';requestAnimationFrame(frame);return;
-}for(let a of ['aPos','aNormal','aColor','aRough','aGlow','aPart','aTexture'])attrs[a]=gl.getAttribLocation(program,a);for(let u of ['uProj','uView','uEye','uTime','uIntensity','uTextureStrength','uMotion[0]','uPivot[0]'])uniforms[u]=gl.getUniformLocation(program,u);
+}for(let a of ['aPos','aNormal','aColor','aRough','aGlow','aPart','aTexture'])attrs[a]=gl.getAttribLocation(program,a);for(let u of ['uProj','uView','uEye','uTime','uIntensity','uRotationPower','uIKPower','uTextureStrength','uMotion[0]','uPivot[0]'])uniforms[u]=gl.getUniformLocation(program,u);
  gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);gl.clearColor(0,0,0,0);requestAnimationFrame(frame)}
 function upload(b){
  let parts=new Float32Array(PART_LIMIT*4),pivots=new Float32Array(PART_LIMIT*4);
  for(let i=0;i<PART_LIMIT;i++){let m=b.partMotions[i]||[0,0,1,0],p=b.partPivots[i]||[0,0,0,0];parts.set(m,i*4);pivots.set(p,i*4)}
  if(mesh&&!softwareMode)gl.deleteBuffer(mesh.buffer);
- if(softwareMode){mesh={data:new Float32Array(b.a),count:b.a.length/13,tris:b.triangles,motions:parts,pivots,parts:b.partMotions.length};prevFrameKey='';return}
+ if(softwareMode){mesh={data:new Float32Array(b.a),count:b.a.length/13,tris:b.triangles,motions:parts,pivots,parts:b.partMotions.length,baseMotions:b.partMotions.map(m=>m.slice()),partKeys:b.partKeys.slice()};applyMotionControls();prevFrameKey='';return}
  let buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(b.a),gl.STATIC_DRAW);
- mesh={buffer:buf,count:b.a.length/13,tris:b.triangles,motions:parts,pivots,parts:b.partMotions.length};
+ mesh={buffer:buf,count:b.a.length/13,tris:b.triangles,motions:parts,pivots,parts:b.partMotions.length,baseMotions:b.partMotions.map(m=>m.slice()),partKeys:b.partKeys.slice()};
  for(let [name,size,offset] of [['aPos',3,0],['aNormal',3,3],['aColor',3,6],['aRough',1,9],['aGlow',1,10],['aPart',1,11],['aTexture',1,12]]){let loc=attrs[name];if(loc<0)continue;gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,size,gl.FLOAT,false,13*4,offset*4)}
- gl.useProgram(program);gl.uniform4fv(uniforms['uMotion[0]'],parts);gl.uniform4fv(uniforms['uPivot[0]'],pivots);
+ gl.useProgram(program);gl.uniform4fv(uniforms['uPivot[0]'],pivots);applyMotionControls();
 }
 
+function partCategory(key){return key.startsWith('mass0')||key.startsWith('detail0')?'left':key.startsWith('mass1')||key.startsWith('detail1')?'right':'fusion'}
+function partLabel(key){let g=partCategory(key),prefix=g==='left'?'左':g==='right'?'右':'融合';if(key.startsWith('mass'))return prefix+'・母体';if(key.startsWith('detail'))return prefix+'・細部 '+(parseInt(key.split('|')[1]||'0')+1);if(key.includes('joint'))return prefix+'・接合片 '+(parseInt(key.split('|').pop())+1);return prefix+'・連結 '+(parseInt(key.split('|').pop())+1)}
+function presetForPart(key,base){let p=MOTION_PRESETS[motionPreset];if(!p)return base.slice();let r=generator(current?.seed||$('seed').value,'preset|'+motionPreset+'|'+key),first=pick(r,p.modes),second=pick(r,p.modes);if(second===first)second=pick(r,p.modes.filter(v=>v!==first));return [first,second,between(r,p.rate[0],p.rate[1]),between(r,p.amp[0],p.amp[1])]}
+function visibleParts(){if(!mesh)return [];const f=$('partGroup').value;return mesh.partKeys.map((key,i)=>({key,i,group:partCategory(key)})).filter(p=>f==='all'||p.group===f)}
+function applyMotionControls(){if(!mesh)return;for(let i=0;i<mesh.parts;i++){let key=mesh.partKeys[i],m=presetForPart(key,mesh.baseMotions[i]);if(partRotationEnabled.get(key)===false){for(let j=0;j<2;j++)if(ROTATIONAL_MODES.has(m[j]))m[j]+=100}mesh.motions.set(m,i*4)}if(!softwareMode){gl.useProgram(program);gl.uniform4fv(uniforms['uMotion[0]'],mesh.motions)}prevFrameKey='';renderPartControls()}
+function renderPartControls(){if(!mesh)return;const list=$('partList');list.replaceChildren();let count=0;for(const {key,i} of visibleParts()){const m=Array.from(mesh.motions.slice(i*4,i*4+2)).map(n=>n>=100?n-100:n),rotatable=m.some(v=>ROTATIONAL_MODES.has(v)),enabled=partRotationEnabled.get(key)!==false;const row=document.createElement('label');row.className='part-item'+(!rotatable?' inactive':'');const name=document.createElement('span');name.className='part-name';name.textContent=partLabel(key);const desc=document.createElement('span');desc.className='part-motion';desc.textContent=m.map(v=>MOTIONS[v]||'').join(' × ');const box=document.createElement('input');box.type='checkbox';box.checked=rotatable&&enabled;box.disabled=!rotatable;box.title=rotatable?'この部位の回転を切り替え':'回転運動を持たない部位';box.setAttribute('aria-label',partLabel(key)+' 回転');box.onchange=()=>{partRotationEnabled.set(key,box.checked);applyMotionControls()};row.append(name,desc,box);list.append(row);if(rotatable)count++}if(!list.children.length){const empty=document.createElement('div');empty.className='hint';empty.textContent='該当する部位がありません';list.append(empty)}$('rotationPartCount').textContent=count+'部位で回転可能'}
+function setVisibleRotations(enabled){for(const {key} of visibleParts())partRotationEnabled.set(key,enabled);applyMotionControls()}
 function setBackground(idx){let colors=[['#d8e2e7','#8b9ba6'],['#e7dacc','#b6a399'],['#d5dadd','#757a89'],['#dfded0','#a8b9a2'],['#c3cdd1','#647184']][idx];$('viewer').style.background=`radial-gradient(ellipse at 49% 35%, ${colors[0]}, ${colors[1]})`}
-function cpuMove(p,part,t){let idx=Math.min(PART_LIMIT-1,part),m=mesh.motions,pv=mesh.pivots,k=idx*4,mode=m[k],secondary=m[k+1],rate=m[k+2],amp=m[k+3]*motionAmplitude,phase=pv[k+3],w=Math.sin(t*rate*Math.PI*2+phase);let q=[p[0]-pv[k],p[1]-pv[k+1],p[2]-pv[k+2]];
- for(let type of [mode,secondary]){if(type===0||type===10){let s=1+(type===0?1:-.58)*amp*w;q=q.map(x=>x*s)}else if(type===1||type===9){let a=t*rate*amp*.6,c=Math.cos(a),z=Math.sin(a);q=[q[0]*c-q[2]*z,q[1],q[0]*z+q[2]*c]}else if(type===4){let r=amp*Math.pow(Math.max(0,w),5)*1.9,nn=normalize(q);q=add(q,mul(nn,r))}else if(type===5){q[1]-=amp*(.5+.5*w)*.6}else if(type===11){q[1]+=amp*w*.6}else if(type===8){q[0]+=amp*.2*Math.sin(t*rate*19+q[1]*12)}else if(type===6){q[0]-=amp*.35*w}else{q[2]+=amp*.19*Math.sin(t*rate*4+q[0]*3)} }
+function cpuMove(p,part,t){let idx=Math.min(PART_LIMIT-1,part),m=mesh.motions,pv=mesh.pivots,k=idx*4,mode=m[k],secondary=m[k+1],rate=m[k+2],amp=m[k+3]*motionAmplitude,phase=pv[k+3],tt=t*rate,w=Math.sin(tt*Math.PI*2+phase),w2=Math.sin(tt*3.17+phase*1.3),w3=Math.sin(tt*1.73+phase*2.1);let q=[p[0]-pv[k],p[1]-pv[k+1],p[2]-pv[k+2]];
+ function rotXZ(v,a){let c=Math.cos(a),s=Math.sin(a);return [v[0]*c-v[2]*s,v[1],v[0]*s+v[2]*c]}
+ function rotYZ(v,a){let c=Math.cos(a),s=Math.sin(a);return [v[0],v[1]*c-v[2]*s,v[1]*s+v[2]*c]}
+ function rotXY(v,a){let c=Math.cos(a),s=Math.sin(a);return [v[0]*c-v[1]*s,v[0]*s+v[1]*c,v[2]]}
+ for(let type of [mode,secondary]){if(type>=100)continue;let a=amp*(ROTATIONAL_MODES.has(type)?rotationPower:IK_MODES.has(type)?ikPower:1);let distal=Math.min(1,Math.hypot(q[0],q[1],q[2])*.62),chain=Math.max(0,Math.min(1,(distal-.02)/.98)),tip=chain*chain;
+  if(type<1){let s=1+a*w*(.16+.24*chain);q=q.map(x=>x*s)}
+  else if(type<2){q=rotXZ(q,a*tt*.72*(.35+.65*chain))}
+  else if(type<3){q=[q[0]*(1+a*w*.28*(.3+.7*chain)),q[1]*(1+a*w*.12*(.3+.7*chain)),q[2]*(1+a*w*.22*(.3+.7*chain))]}
+  else if(type<4){q=[q[0]+Math.sin(tt*2.6+q[1]*3)*a*.12*(.15+chain),q[1]+Math.cos(tt*1.9+q[2]*4.1)*a*.12*(.15+chain),q[2]+Math.sin(tt*2.1+q[0]*2.8)*a*.12*(.15+chain)]}
+  else if(type<5){let rr=a*Math.pow(Math.max(0,w),6)*(.18+.85*tip),nn=normalize(q);q=add(q,mul(nn,rr))}
+  else if(type<6){q=[q[0]+a*.04*w,q[1]-a*(.08+.14*(.5+.5*w))*(0.2+distal),q[2]+a*.06*Math.sin(tt*1.3+q[1]*2.2)]}
+  else if(type<7){q=[q[0]-a*.16*Math.sin(tt*1.8+q[1]*2)*(0.2+chain),q[1],q[2]-a*.14*Math.sin(tt*1.9+q[0]*2.3)*(0.2+tip)]}
+  else if(type<8){q=[q[0]+a*Math.sin(q[1]*1.4+tt)*.14*(0.25+chain),q[1],q[2]+a*Math.cos(q[0]*1.8-tt)*.11*(0.25+tip)]}
+  else if(type<9){q=[q[0]+a*.045*Math.sin(tt*12+q[1]*10),q[1]+a*.045*Math.sin(tt*11+q[2]*12),q[2]+a*.045*Math.sin(tt*13+q[0]*11)]}
+  else if(type<10){q=rotXZ(q,a*Math.sin(tt+q[1]*1.6)*(.3+.7*chain))}
+  else if(type<11){let s=1-a*(.08+.20*(.5+.5*w))*(0.2+chain);q=q.map(x=>x*s)}
+  else if(type<12){q=[q[0]+a*.08*w*(.3+.7*chain),q[1]+a*.18*w2*(.3+.7*chain),q[2]+a*.05*w3*(.3+.7*chain)]}
+  else if(type<13){let rr=a*.14*Math.sin(tt*2.4-Math.hypot(...q)*6)*(0.2+tip),nn=normalize(q);q=add(q,mul(nn,rr))}
+  else if(type<14){q=[q[0]-q[2]*a*.08*Math.sin(tt*1.1+q[1])*(.25+chain),q[1],q[2]+q[0]*a*.08*Math.sin(tt*1.1+q[1])*(.25+chain)]}
+  else if(type<15){let rr=a*.07*(w>.78?1:0)*(0.2+tip),nn=normalize(q);q=add(q,mul(nn,rr))}
+  else if(type<16){q=[q[0]+q[1]*a*.16*w*(.15+chain),q[1]+q[2]*a*.11*w2*(.15+chain),q[2]+q[0]*a*.08*w3*(.15+chain)]}
+  else if(type<17){q=rotYZ(q,a*(0.22+0.78*tip)*Math.sin(tt*1.2+phase))}
+  else if(type<18){q=rotXZ(q,a*(0.10+0.55*chain)*Math.sin(tt*1.5+phase));q=rotYZ(q,a*(0.05+0.35*tip)*Math.sin(tt*2.1+phase*1.7))}
+  else if(type<19){q=[q[0]+a*.03*Math.sin(tt*5+q[1]*4)*(0.2+0.8*tip),q[1]+a*.02*Math.sin(tt*7+q[2]*4)*(0.2+0.8*tip),q[2]+a*.03*Math.sin(tt*6+q[0]*5)*(0.2+0.8*tip)]}
+  else if(type<20){q=rotYZ(q,a*(0.12+0.48*chain)*Math.sin(tt*1.9+phase))}
+  else if(type<21){q=rotXZ(q,a*(0.12+0.54*chain)*Math.sin(tt*1.6+phase*1.2))}
+  else if(type<22){q=rotXY(q,a*(0.10+0.46*chain)*Math.sin(tt*2.1+phase*0.8))}
+  else {let orbit=a*(0.05+0.22*chain);q=[q[0]+Math.cos(tt*1.35+phase)*orbit*(0.2+0.8*tip),q[1]+Math.sin(tt*1.9+phase*.7)*orbit*(0.2+0.8*tip),q[2]+Math.sin(tt*1.1+phase)*orbit*(0.2+0.8*tip)]}
+ }
  return [q[0]+pv[k],q[1]+pv[k+1],q[2]+pv[k+2]]}
 function drawSoftware(w,h){let cx=ctx2d,a=mesh.data,aspect=w/h,yaw=rotation.yaw,pitch=rotation.pitch;
  cx.clearRect(0,0,w,h);let eye=[Math.cos(pitch)*Math.sin(yaw),Math.sin(pitch),Math.cos(pitch)*Math.cos(yaw)],right=[Math.cos(yaw),0,-Math.sin(yaw)],up=normalize(cross(eye,right));let f=.5*h/Math.tan(.70/2),zz=zoom*(aspect<1?.95:1),tri=[],limit=isPlaying?5500:12000,stride=Math.ceil(mesh.tris/limit),lx=-.56,ly=.92,lz=.68;
@@ -341,13 +423,13 @@ function frame(stamp){requestAnimationFrame(frame);let dt=lastTick?Math.min(.06,
  if(softwareMode){if(mesh){let key=[w,h,rotation.yaw.toFixed(3),rotation.pitch.toFixed(3),zoom.toFixed(2),mesh.tris,Math.floor(motionClock*12),textureLevel].join('/');if(key!==prevFrameKey){drawSoftware(w,h);prevFrameKey=key}}return}
  if(!gl)return;
  gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);if(!mesh)return;let aspect=w/h,zz=zoom*(aspect<1?.95:1),eye=[zz*Math.cos(rotation.pitch)*Math.sin(rotation.yaw),zz*Math.sin(rotation.pitch),zz*Math.cos(rotation.pitch)*Math.cos(rotation.yaw)];gl.useProgram(program);
- gl.uniformMatrix4fv(uniforms.uProj,false,matPerspective(.70,aspect,.1,120));gl.uniformMatrix4fv(uniforms.uView,false,lookAt(eye,[0,0,0],[0,1,0]));gl.uniform3f(uniforms.uEye,...eye);gl.uniform1f(uniforms.uTime,motionClock);gl.uniform1f(uniforms.uIntensity,motionAmplitude);gl.uniform1f(uniforms.uTextureStrength,textureLevel);gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
+ gl.uniformMatrix4fv(uniforms.uProj,false,matPerspective(.70,aspect,.1,120));gl.uniformMatrix4fv(uniforms.uView,false,lookAt(eye,[0,0,0],[0,1,0]));gl.uniform3f(uniforms.uEye,...eye);gl.uniform1f(uniforms.uTime,motionClock);gl.uniform1f(uniforms.uIntensity,motionAmplitude);gl.uniform1f(uniforms.uRotationPower,rotationPower);gl.uniform1f(uniforms.uIKPower,ikPower);gl.uniform1f(uniforms.uTextureStrength,textureLevel);gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
  for(let [name,size,offset] of [['aPos',3,0],['aNormal',3,3],['aColor',3,6],['aRough',1,9],['aGlow',1,10],['aPart',1,11],['aTexture',1,12]]){let loc=attrs[name];if(loc>=0)gl.vertexAttribPointer(loc,size,gl.FLOAT,false,13*4,offset*4)}gl.drawArrays(gl.TRIANGLES,0,mesh.count)
 }
 
 function updateStats(r,b){$('modeL').textContent=NAMES[r.modes[0]];$('modeR').textContent=NAMES[r.modes[1]];$('relationship').textContent=RELATIONSHIPS[r.relation];$('fusionStat').textContent=Math.round(r.fusion*100)+'% / '+r.dist.toFixed(2);$('boolStat').textContent=`加算 + / 減算 ${r.csg[0]+r.csg[1]}箇所`;$('triangles').textContent=b.triangles.toLocaleString('ja-JP');$('frameSeed').textContent=r.seed;$('frameMeta').textContent=NAMES[r.modes[0]]+' × '+NAMES[r.modes[1]];$('keywordTags').innerHTML=r.keywords.map(w=>'<span class="tagword">'+w+'</span>').join('');$('motionCount').textContent=b.partMotions.length+'パーツ / 複合運動';$('motionInfo').textContent='質感：'+r.textures.map((ts,i)=>(i?'右':'左')+ts.map(t=>TEXTURES[t]).join('・')).join(' ／ ')+'。動き：'+b.partMotions.slice(0,4).map(m=>MOTIONS[m[0]]+'×'+MOTIONS[m[1]]).join('、')}
 function toast(message){let t=$('toast');t.textContent=message;t.classList.add('show');clearTimeout(t._tm);t._tm=setTimeout(()=>t.classList.remove('show'),2300)}
-async function generate(seed){if(generating)return;generating=true;$('loading').classList.add('active');$('generate').disabled=true;$('same').disabled=true;$('seed').value=seed;await new Promise(done=>setTimeout(done,25));try{let r=makeRecipe(seed);let b=makeGeometry(r);upload(b);current=r;motionClock=0;prevFrameKey='';syncPalette(r);updateStats(r,b);setBackground(r.background);rotation={yaw:between(generator(seed,'camera'),-.7,.7),pitch:between(generator(seed,'cameraPitch'),-.3,.32)};initialRotation={...rotation};zoom=Math.max(6.7,r.dist*1.8+3.25);try{let u=new URL(location.href);u.searchParams.set('seed',seed);history.replaceState({},'',u)}catch(e){};toast('新しい味覚構造体を生成しました')}catch(err){console.error(err);toast('生成エラー：'+err.message)}finally{generating=false;$('loading').classList.remove('active');$('generate').disabled=false;$('same').disabled=false}}
+async function generate(seed){if(generating)return;generating=true;$('loading').classList.add('active');$('generate').disabled=true;$('same').disabled=true;$('seed').value=seed;await new Promise(done=>setTimeout(done,25));try{let sameSeed=current&&current.seed===seed;if(!sameSeed)partRotationEnabled=new Map();let r=makeRecipe(seed);let b=makeGeometry(r);current=r;upload(b);motionClock=0;prevFrameKey='';syncPalette(r);updateStats(r,b);setBackground(r.background);rotation={yaw:between(generator(seed,'camera'),-.7,.7),pitch:between(generator(seed,'cameraPitch'),-.3,.32)};initialRotation={...rotation};zoom=Math.max(6.7,r.dist*1.8+3.25);try{let u=new URL(location.href);u.searchParams.set('seed',seed);history.replaceState({},'',u)}catch(e){};toast('新しい味覚構造体を生成しました')}catch(err){console.error(err);toast('生成エラー：'+err.message)}finally{generating=false;$('loading').classList.remove('active');$('generate').disabled=false;$('same').disabled=false}}
 function download(blob,name){let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
 function savePNG(){
  if(!mesh || !current)return;
@@ -363,7 +445,7 @@ function savePNG(){
  ctx.drawImage(source,0,0);
  out.toBlob(b=>{if(b)download(b,'flavor-structure-'+current.seed+'.png');else toast('PNGを保存できませんでした')},'image/png');
 }
-function saveJSON(){if(!current)return;const payload={app:'Flavor Structure Lab prototype 0.2, animated',created:new Date().toISOString(),palette:palette,recipe:current,animation:{clock:motionClock,playing:isPlaying,speed:motionSpeed,amplitude:motionAmplitude,textureStrength:textureLevel}};download(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'flavor-structure-'+current.seed+'.json')}
+function saveJSON(){if(!current)return;const payload={app:'Flavor Structure Lab prototype 0.5, part motion controls',created:new Date().toISOString(),palette:palette,recipe:current,animation:{clock:motionClock,playing:isPlaying,speed:motionSpeed,amplitude:motionAmplitude,rotationPower,ikPower,motionPreset,partRotationEnabled:Object.fromEntries(partRotationEnabled),textureStrength:textureLevel}};download(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'flavor-structure-'+current.seed+'.json')}
 function renderSaved(){let list=$('savedList');$('savedCount').textContent=saved.length+'件';list.innerHTML='';saved.forEach((item,i)=>{let line=document.createElement('div');line.style='display:flex;align-items:center;gap:7px;border:1px solid #303d48;border-radius:8px;padding:5px;';let b=document.createElement('button');b.className='btn compact';b.style='flex:1;text-align:left';b.textContent=item.seed+' · '+item.colors.slice(0,3).join(' ');b.title='再現';b.onclick=()=>generate(item.seed);let d=document.createElement('button');d.className='btn compact';d.textContent='×';d.title='削除';d.onclick=()=>{saved.splice(i,1);persist()};line.append(b,d);list.append(line)})}
 function persist(){try{localStorage.setItem('flavorlab_favorites',JSON.stringify(saved))}catch(e){toast('ブラウザ保存が利用できません')}renderSaved()}
 function wire(){
@@ -372,9 +454,12 @@ function wire(){
  $('playMotion').onclick=()=>{isPlaying=!isPlaying;const b=$('playMotion');b.textContent=isPlaying?'⏸ 一時停止':'▶ 再生';b.setAttribute('aria-pressed',String(isPlaying));prevFrameKey=''};
  $('playMotion').textContent=isPlaying?'⏸ 一時停止':'▶ 再生';$('playMotion').setAttribute('aria-pressed',String(isPlaying));
  $('restartMotion').onclick=()=>{motionClock=0;prevFrameKey='';toast('動きを先頭に戻しました')};
- for(let [id,show,action] of [['motionSpeed','motionSpeedValue',v=>motionSpeed=v/100],['motionAmount','motionAmountValue',v=>motionAmplitude=v/100],['surface','surfaceValue',v=>textureLevel=v/100],['gradient','gradientValue',v=>{}]]){
+ for(let [id,show,action] of [['motionSpeed','motionSpeedValue',v=>motionSpeed=v/100],['motionAmount','motionAmountValue',v=>motionAmplitude=v/100],['rotationPower','rotationPowerValue',v=>rotationPower=v/100],['ikPower','ikPowerValue',v=>ikPower=v/100],['surface','surfaceValue',v=>textureLevel=v/100],['gradient','gradientValue',v=>{}]]){
   $(id).oninput=()=>{let val=Number($(id).value);$(show).textContent=val+'%';action(val);prevFrameKey=''};
  }
+ $('motionPreset').onchange=()=>{motionPreset=$('motionPreset').value;applyMotionControls();toast('運動プリセットを切り替えました')};
+ $('partGroup').onchange=renderPartControls;
+ $('rotAllOn').onclick=()=>setVisibleRotations(true);$('rotAllOff').onclick=()=>setVisibleRotations(false);
  $('gradient').onchange=()=>{if(current)generate(current.seed)};
  $('theme').onchange=()=>{if(current)generate(current.seed)};
 
