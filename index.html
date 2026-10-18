@@ -28,7 +28,7 @@ aside{z-index:3;overflow-y:auto;background:var(--panel);border-right:1px solid v
 <body>
 <div class="app">
 <aside><div class="side-inner">
- <div class="logo"><div class="logo-symbol">◈</div><div><div class="pre">GENERATIVE TASTE ARCHITECTURE · v0.8</div><h1>FLAVOR STRUCTURE LAB <span style="color:#93a7ae;font-size:10px;font-weight:600">β</span></h1></div></div>
+ <div class="logo"><div class="logo-symbol">◈</div><div><div class="pre">GENERATIVE TASTE ARCHITECTURE · v0.9</div><h1>FLAVOR STRUCTURE LAB <span style="color:#93a7ae;font-size:10px;font-weight:600">β</span></h1></div></div>
  <div class="eyebrow">01 / GENERATION</div>
  <div class="heading"><b>シードから生成</b><span class="mini">再現可能</span></div>
  <div class="field"><input id="seed" type="text" inputmode="numeric" spellcheck="false" aria-label="シード番号" maxlength="40" placeholder="シードを入力"><button class="btn compact" id="same" title="同じシードで再生成">再現</button></div>
@@ -87,7 +87,7 @@ aside{z-index:3;overflow-y:auto;background:var(--panel);border-right:1px solid v
  <div class="button-grid"><button class="btn" id="savePng">画像 PNG</button><button class="btn" id="saveJson">設定 JSON</button><button class="btn" id="bookmark">☆ お気に入り</button><button class="btn" id="copyLink">再現リンク</button></div>
  <div class="heading"><b>お気に入りのシード</b><span class="mini" id="savedCount">0件</span></div>
  <div id="savedList" style="display:grid;gap:6px"></div>
- <p class="footer">v0.8：Canvas描画のポリゴン間引きを廃止・一体面を維持。局所回転・陰影・フラット表示対応。完全オフライン動作・外部ライブラリ不要。実際の3Dメッシュを生成し、加算・減算を符号付き距離場（SDF）で計算する試作版です。造形の品質向上と高度なメッシュ書き出しは今後の拡張対象です。</p>
+ <p class="footer">v0.9：Canvas描画のポリゴン間引きを廃止・一体面を維持。局所回転・陰影・フラット表示対応。完全オフライン動作・外部ライブラリ不要。実際の3Dメッシュを生成し、加算・減算を符号付き距離場（SDF）で計算する試作版です。造形の品質向上と高度なメッシュ書き出しは今後の拡張対象です。</p>
 </div></aside>
 <main class="viewer" id="viewer">
  <canvas id="glview" aria-label="ドラッグで回転できる3D構造体"></canvas>
@@ -424,14 +424,44 @@ function cpuMove(p,part,t){let idx=Math.min(PART_LIMIT-1,part),m=mesh.motions,pv
  return [q[0]+pv[k],q[1]+pv[k+1],q[2]+pv[k+2]]}
 function drawSoftware(w,h){let cx=ctx2d,a=mesh.data,aspect=w/h,yaw=rotation.yaw,pitch=rotation.pitch;
  cx.clearRect(0,0,w,h);let eye=[Math.cos(pitch)*Math.sin(yaw),Math.sin(pitch),Math.cos(pitch)*Math.cos(yaw)],right=[Math.cos(yaw),0,-Math.sin(yaw)],up=normalize(cross(eye,right));let f=.5*h/Math.tan(.70/2),zz=zoom*(aspect<1?.95:1),tri=[],lx=-.56,ly=.92,lz=.68;
- for(let k=0;k<mesh.tris;k++){let pts=[],depth=0,visible=true;for(let v=0;v<3;v++){let o=(k*3+v)*13,x=a[o],y=a[o+1],z=a[o+2],p=cpuMove([x,y,z],a[o+11],motionClock),vx=dot(p,right),vy=dot(p,up),vz=dot(p,eye),dist=zz-vz;if(dist<.2){visible=false;break}let sc=f/dist;pts.push([w*.5+vx*sc,h*.5-vy*sc]);depth+=vz}if(!visible)continue;let u=k*39,nx=a[u+3],ny=a[u+4],nz=a[u+5],rough=a[u+9],tex=a[u+12],light=clamp(.36+Math.max(0,nx*lx+ny*ly+nz*lz)*.69,.25,1.1),jitter=(Math.sin(k*79+tex*21)*.5+.5-.5)*textureLevel*.26,cleanFlat=!shadingEnabled&&flatTextureOff,rgb=[0,1,2].map(c=>{let avg=(a[u+6+c]+a[u+19+c]+a[u+32+c])/3;if(cleanFlat)return Math.round(255*clamp(avg,0,1));let lit=shadingEnabled?Math.max(0,1+(light-1)*shadingStrength):1;let val=shadingEnabled?clamp(avg*(lit+jitter)+.03,0,1):clamp(avg*(1+jitter*.7),0,1);return Math.round(255*Math.pow(val,.86))});tri.push({pts,depth:depth/3,fill:'rgb('+rgb.join(',')+')'})}
+ const mix3=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];
+ const baryPoint=(v,b)=>[v[0][0]*b[0]+v[1][0]*b[1]+v[2][0]*b[2],v[0][1]*b[0]+v[1][1]*b[1]+v[2][1]*b[2]];
+ const baryColor=(c,b)=>[c[0][0]*b[0]+c[1][0]*b[1]+c[2][0]*b[2],c[0][1]*b[0]+c[1][1]*b[1]+c[2][1]*b[2],c[0][2]*b[0]+c[1][2]*b[1]+c[2][2]*b[2]];
+ const rgbCss=c=>'rgb('+c.map(v=>Math.round(v)).join(',')+')';
+ const fillTri=(pts,fill,grow=0)=>{let p=pts;if(grow!==0){let cx0=(pts[0][0]+pts[1][0]+pts[2][0])/3,cy0=(pts[0][1]+pts[1][1]+pts[2][1])/3;p=pts.map(q=>{let dx=q[0]-cx0,dy=q[1]-cy0,len=Math.hypot(dx,dy)||1;return [q[0]+dx/len*grow,q[1]+dy/len*grow]})}cx.fillStyle=fill;cx.beginPath();cx.moveTo(p[0][0],p[0][1]);cx.lineTo(p[1][0],p[1][1]);cx.lineTo(p[2][0],p[2][1]);cx.closePath();cx.fill()};
+ for(let k=0;k<mesh.tris;k++){
+  let pts=[],world=[],depth=0,visible=true,cols=[];
+  for(let v=0;v<3;v++){
+   let o=(k*3+v)*13,x=a[o],y=a[o+1],z=a[o+2],p=cpuMove([x,y,z],a[o+11],motionClock),vx=dot(p,right),vy=dot(p,up),vz=dot(p,eye),dist=zz-vz;
+   if(dist<.2){visible=false;break}
+   let sc=f/dist;pts.push([w*.5+vx*sc,h*.5-vy*sc]);world.push(p);depth+=vz;
+   let nx=a[o+3],ny=a[o+4],nz=a[o+5],tex=a[o+12],light=clamp(.36+Math.max(0,nx*lx+ny*ly+nz*lz)*.69,.25,1.1),jitter=(Math.sin((k*3+v)*79+tex*21+p[0]*9+p[1]*7+p[2]*11)*.5+.5-.5)*textureLevel*.22,cleanFlat=!shadingEnabled&&flatTextureOff;
+   cols.push([0,1,2].map(c=>{let base=a[o+6+c];if(cleanFlat)return Math.round(255*clamp(base,0,1));let lit=shadingEnabled?Math.max(0,1+(light-1)*shadingStrength):1;let val=shadingEnabled?clamp(base*(lit+jitter)+.03,0,1):clamp(base*(1+jitter*.7),0,1);return 255*Math.pow(val,.86)}));
+  }
+  if(!visible)continue;
+  let area=Math.abs((pts[1][0]-pts[0][0])*(pts[2][1]-pts[0][1])-(pts[2][0]-pts[0][0])*(pts[1][1]-pts[0][1]))*.5;
+  let avg=[0,1,2].map(i=>(cols[0][i]+cols[1][i]+cols[2][i])/3);
+  let subdiv=shadingEnabled?clamp(Math.ceil(Math.sqrt(area)/22),1,6):1;
+  tri.push({pts,cols,avg,depth:depth/3,subdiv,area})
+ }
  tri.sort((a,b)=>a.depth-b.depth);
- // A tiny shared-edge overdraw prevents Canvas anti-aliasing from revealing hairline cracks.
- // All triangles are retained; this is not a geometry decimation shortcut.
+ // Paint a slightly expanded base triangle first to hide hairline seams,
+ // then overlay a Gouraud-like subdivided shading pass for a smoother surface.
  for(let t of tri){
-  let v=t.pts, cx0=(v[0][0]+v[1][0]+v[2][0])/3,cy0=(v[0][1]+v[1][1]+v[2][1])/3;
-  let p=v.map(a=>{let dx=a[0]-cx0,dy=a[1]-cy0,len=Math.hypot(dx,dy)||1;return [a[0]+dx/len*.35,a[1]+dy/len*.35]});
-  cx.fillStyle=t.fill;cx.beginPath();cx.moveTo(p[0][0],p[0][1]);cx.lineTo(p[1][0],p[1][1]);cx.lineTo(p[2][0],p[2][1]);cx.closePath();cx.fill();
+  fillTri(t.pts,rgbCss(t.avg),.42);
+  if(!shadingEnabled||t.subdiv<=1||t.area<36)continue;
+  let n=t.subdiv;
+  for(let i=0;i<n;i++){
+   for(let j=0;j<n-i;j++){
+    let b0=[i/n,j/n,1-(i+j)/n],b1=[(i+1)/n,j/n,1-(i+1+j)/n],b2=[i/n,(j+1)/n,1-(i+j+1)/n];
+    let p0=baryPoint(t.pts,b0),p1=baryPoint(t.pts,b1),p2=baryPoint(t.pts,b2),c0=baryColor(t.cols,b0),c1=baryColor(t.cols,b1),c2=baryColor(t.cols,b2);
+    fillTri([p0,p1,p2],rgbCss([(c0[0]+c1[0]+c2[0])/3,(c0[1]+c1[1]+c2[1])/3,(c0[2]+c1[2]+c2[2])/3]));
+    if(j<n-i-1){
+     let b3=[(i+1)/n,(j+1)/n,1-(i+j+2)/n],p3=baryPoint(t.pts,b3),c3=baryColor(t.cols,b3);
+     fillTri([p1,p3,p2],rgbCss([(c1[0]+c3[0]+c2[0])/3,(c1[1]+c3[1]+c2[1])/3,(c1[2]+c3[2]+c2[2])/3]));
+    }
+   }
+  }
  }
 }
 function frame(stamp){requestAnimationFrame(frame);let dt=lastTick?Math.min(.06,(stamp-lastTick)/1000):0;lastTick=stamp;if(isPlaying&&mesh)motionClock+=dt*motionSpeed;
@@ -461,7 +491,7 @@ function savePNG(){
  ctx.drawImage(source,0,0);
  out.toBlob(b=>{if(b)download(b,'flavor-structure-'+current.seed+'.png');else toast('PNGを保存できませんでした')},'image/png');
 }
-function saveJSON(){if(!current)return;const payload={app:'Flavor Structure Lab prototype 0.7, shading and texture toggles',created:new Date().toISOString(),palette:palette,recipe:current,animation:{clock:motionClock,playing:isPlaying,speed:motionSpeed,amplitude:motionAmplitude,rotationPower,ikPower,motionPreset,partRotationEnabled:Object.fromEntries(partRotationEnabled),textureStrength:textureLevel,shadingEnabled,shadingStrength,flatTextureOff}};download(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'flavor-structure-'+current.seed+'.json')}
+function saveJSON(){if(!current)return;const payload={app:'Flavor Structure Lab prototype 0.9, smooth-shaded canvas renderer',created:new Date().toISOString(),palette:palette,recipe:current,animation:{clock:motionClock,playing:isPlaying,speed:motionSpeed,amplitude:motionAmplitude,rotationPower,ikPower,motionPreset,partRotationEnabled:Object.fromEntries(partRotationEnabled),textureStrength:textureLevel,shadingEnabled,shadingStrength,flatTextureOff}};download(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'flavor-structure-'+current.seed+'.json')}
 function renderSaved(){let list=$('savedList');$('savedCount').textContent=saved.length+'件';list.innerHTML='';saved.forEach((item,i)=>{let line=document.createElement('div');line.style='display:flex;align-items:center;gap:7px;border:1px solid #303d48;border-radius:8px;padding:5px;';let b=document.createElement('button');b.className='btn compact';b.style='flex:1;text-align:left';b.textContent=item.seed+' · '+item.colors.slice(0,3).join(' ');b.title='再現';b.onclick=()=>generate(item.seed);let d=document.createElement('button');d.className='btn compact';d.textContent='×';d.title='削除';d.onclick=()=>{saved.splice(i,1);persist()};line.append(b,d);list.append(line)})}
 function persist(){try{localStorage.setItem('flavorlab_favorites',JSON.stringify(saved))}catch(e){toast('ブラウザ保存が利用できません')}renderSaved()}
 function wire(){
