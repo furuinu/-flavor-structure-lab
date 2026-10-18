@@ -62,6 +62,10 @@ aside{z-index:3;overflow-y:auto;background:var(--panel);border-right:1px solid v
  <div class="slider-wrap"><div class="sliderlabel"><span>部位別の回転強度</span><span id="rotationPowerValue">100%</span></div><input type="range" min="0" max="200" value="100" id="rotationPower" aria-label="部位別の回転強度"></div>
  <div class="slider-wrap"><div class="sliderlabel"><span>IK・多関節の強度</span><span id="ikPowerValue">100%</span></div><input type="range" min="0" max="200" value="100" id="ikPower" aria-label="IKと多関節の強度"></div>
  <div class="slider-wrap"><div class="sliderlabel"><span>質感の強調</span><span id="surfaceValue">70%</span></div><input type="range" min="0" max="100" value="70" id="surface"></div>
+ <label class="switchrow"><input type="checkbox" id="shading" checked>陰影を有効にする <span class="mini">OFFでフラット表示</span></label>
+ <div class="slider-wrap"><div class="sliderlabel"><span>陰影の強さ</span><span id="shadingStrengthValue">100%</span></div><input type="range" min="0" max="200" value="100" step="5" id="shadingStrength" aria-label="陰影の強さ"></div>
+ <label class="switchrow"><input type="checkbox" id="flatTextureOff">フラット表示ではテクスチャも消す</label>
+ <div class="hint">陰影OFFで色面を均一に表示できます。「テクスチャも消す」をONにすると、凹凸・粒子・光沢・発光を含む表面効果を無効にし、元の色面とグラデーションのみを表示します。</div>
  <div class="slider-wrap"><div class="sliderlabel"><span>色面のグラデーション</span><span id="gradientValue">75%</span></div><input type="range" min="0" max="100" value="75" id="gradient"></div>
  <div class="motion-info" id="motionInfo">脈動・回転・融解などを複数合成。時間を止めれば同一シードの同一フレームを再現できます。</div>
  <details class="disclosure" id="partTuning"><summary>部位ごとの回転ON/OFF <span class="mini" id="rotationPartCount">—</span></summary><div class="inside">
@@ -112,7 +116,7 @@ const MOTION_PRESETS={
 const RELATIONSHIPS = ['深く貫入','滑らかに融合','梁による接合','相互に巻きつく','嵌合・重合','組み合わさる','圧縮・食い込み'];
 const $ = (id)=>document.getElementById(id);
 let palette=DEFAULT_PALETTE.map(a=>a.slice());
-let current=null, mesh=null, gl=null, ctx2d=null, softwareMode=false, prevFrameKey='', program=null, uniforms={}, attrs={}, inputPointer=null, rotation={yaw:-0.37,pitch:0.18}, initialRotation={yaw:-0.37,pitch:0.18}, zoom=10.5, auto=false, generating=false, saved=[], isPlaying=!matchMedia('(prefers-reduced-motion: reduce)').matches, motionClock=0, lastTick=0, textureLevel=.70, motionAmplitude=.75, motionSpeed=1, rotationPower=1, ikPower=1, motionPreset='random', partRotationEnabled=new Map();
+let current=null, mesh=null, gl=null, ctx2d=null, softwareMode=false, prevFrameKey='', program=null, uniforms={}, attrs={}, inputPointer=null, rotation={yaw:-0.37,pitch:0.18}, initialRotation={yaw:-0.37,pitch:0.18}, zoom=10.5, auto=false, generating=false, saved=[], isPlaying=!matchMedia('(prefers-reduced-motion: reduce)').matches, motionClock=0, lastTick=0, textureLevel=.70, motionAmplitude=.75, motionSpeed=1, rotationPower=1, ikPower=1, shadingEnabled=true, shadingStrength=1, flatTextureOff=false, motionPreset='random', partRotationEnabled=new Map();
 try{saved=JSON.parse(localStorage.getItem('flavorlab_favorites')||'[]')}catch(e){}
 function hashStr(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
 function generator(seed,namespace){let a=hashStr(seed+'|'+namespace)||1;return ()=>{a+=0x6D2B79F5;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296}}
@@ -317,10 +321,13 @@ void main(){
 const fs=`
 precision highp float;
 varying vec3 vNormal;varying vec3 vColor;varying vec3 vWorld;varying float vRough;varying float vGlow;varying float vTexture;
-uniform vec3 uEye;uniform float uTime;uniform float uTextureStrength;
+uniform vec3 uEye;uniform float uTime;uniform float uTextureStrength;uniform float uUseShading;uniform float uShadingStrength;uniform float uFlatTextureOff;
 float hash31(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}
 float texNoise(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(mix(hash31(i),hash31(i+vec3(1.,0.,0.)),f.x),mix(hash31(i+vec3(0.,1.,0.)),hash31(i+vec3(1.,1.,0.)),f.x),f.y),mix(mix(hash31(i+vec3(0.,0.,1.)),hash31(i+vec3(1.,0.,1.)),f.x),mix(hash31(i+vec3(0.,1.,1.)),hash31(i+vec3(1.,1.,1.)),f.x),f.y),f.z);}
 void main(){
+ // Strict unlit mode: preserve the original interpolated palette colors,
+ // without lighting, textures, specular highlights, rim light or emissive glow.
+ if(uUseShading<0.5 && uFlatTextureOff>0.5){gl_FragColor=vec4(clamp(vColor,0.0,1.0),1.0);return;}
  vec3 n=normalize(vNormal),l1=normalize(vec3(-.56,.92,.68)),l2=normalize(vec3(.75,.22,-.7));
  vec3 viewDir=normalize(uEye-vWorld);float t=floor(vTexture+.5);vec3 p=vWorld;float grit=hash31(floor(p*105.0));
  float fine=texNoise(p*22.0),coarse=texNoise(p*6.0);float stripes=sin(p.x*68.0+p.y*37.0+coarse*13.0)*.5+.5;
@@ -343,13 +350,15 @@ void main(){
  else if(t<14.5){texture=(stripes-.5)*.42;rough=.19;metal=.7;}
  else {texture=(grit-.5)*.72+(fine-.5)*.5;rough=.99;}
  float bump=(fine-.5)*uTextureStrength*.19;
- n=normalize(n+vec3(bump,bump*.35,-bump*.58));
+ if(uUseShading>0.5)n=normalize(n+vec3(bump,bump*.35,-bump*.58));
  float diffuse=.25+max(dot(n,l1),0.0)*.69+max(dot(n,l2),0.0)*.28;
  float rim=pow(1.0-max(dot(n,viewDir),0.0),2.0)*.12;
  vec3 h=normalize(viewDir+l1);float spec=pow(max(dot(n,h),0.0),mix(7.0,105.0,1.0-rough))*mix(.05,.85,1.0-rough);
  vec3 base=max(vec3(.0),vColor*(1.0+texture*uTextureStrength));
  float emissive=glow*(.7+.3*sin(uTime*2.7+coarse*4.0));
- vec3 color=base*diffuse+vec3(spec*(1.0+metal))+rim*base+emissive*base;
+ vec3 shaded=base*diffuse+vec3(spec*(1.0+metal))+rim*base+emissive*base;
+ vec3 flat=base+emissive*base*.45;
+ vec3 color=uUseShading>0.5 ? max(vec3(0.0),base+(shaded-base)*uShadingStrength) : flat;
  gl_FragColor=vec4(pow(max(color,vec3(0.0)),vec3(.86)),1.0);
 }`;
 
@@ -362,7 +371,7 @@ function setupGL(){const canvas=$('glview');gl=canvas.getContext('webgl',{alpha:
  const source=vs.replaceAll('uMotion[64]','uMotion['+PART_LIMIT+']').replaceAll('uPivot[64]','uPivot['+PART_LIMIT+']').replace('63.0));',''+(PART_LIMIT-1)+'.0));');
  program=gl.createProgram();gl.attachShader(program,shader(gl,gl.VERTEX_SHADER,source));gl.attachShader(program,shader(gl,gl.FRAGMENT_SHADER,fs));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));gl.useProgram(program)}catch(err){
  console.warn('WebGL shader unavailable; using Canvas renderer',err);let newCanvas=document.createElement('canvas');newCanvas.id='glview';newCanvas.setAttribute('aria-label','ドラッグで回転できる3D構造体');canvas.replaceWith(newCanvas);gl=null;softwareMode=true;ctx2d=newCanvas.getContext('2d',{alpha:true});document.querySelector('.tag').innerHTML='<span class="dot"></span> LIVE 3D · CANVAS';requestAnimationFrame(frame);return;
-}for(let a of ['aPos','aNormal','aColor','aRough','aGlow','aPart','aTexture'])attrs[a]=gl.getAttribLocation(program,a);for(let u of ['uProj','uView','uEye','uTime','uIntensity','uRotationPower','uIKPower','uTextureStrength','uMotion[0]','uPivot[0]'])uniforms[u]=gl.getUniformLocation(program,u);
+}for(let a of ['aPos','aNormal','aColor','aRough','aGlow','aPart','aTexture'])attrs[a]=gl.getAttribLocation(program,a);for(let u of ['uProj','uView','uEye','uTime','uIntensity','uRotationPower','uIKPower','uTextureStrength','uUseShading','uShadingStrength','uFlatTextureOff','uMotion[0]','uPivot[0]'])uniforms[u]=gl.getUniformLocation(program,u);
  gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);gl.clearColor(0,0,0,0);requestAnimationFrame(frame)}
 function upload(b){
  let parts=new Float32Array(PART_LIMIT*4),pivots=new Float32Array(PART_LIMIT*4);
@@ -415,15 +424,15 @@ function cpuMove(p,part,t){let idx=Math.min(PART_LIMIT-1,part),m=mesh.motions,pv
  return [q[0]+pv[k],q[1]+pv[k+1],q[2]+pv[k+2]]}
 function drawSoftware(w,h){let cx=ctx2d,a=mesh.data,aspect=w/h,yaw=rotation.yaw,pitch=rotation.pitch;
  cx.clearRect(0,0,w,h);let eye=[Math.cos(pitch)*Math.sin(yaw),Math.sin(pitch),Math.cos(pitch)*Math.cos(yaw)],right=[Math.cos(yaw),0,-Math.sin(yaw)],up=normalize(cross(eye,right));let f=.5*h/Math.tan(.70/2),zz=zoom*(aspect<1?.95:1),tri=[],limit=isPlaying?5500:12000,stride=Math.ceil(mesh.tris/limit),lx=-.56,ly=.92,lz=.68;
- for(let k=0;k<mesh.tris;k+=stride){let pts=[],depth=0,visible=true;for(let v=0;v<3;v++){let o=(k*3+v)*13,x=a[o],y=a[o+1],z=a[o+2],p=cpuMove([x,y,z],a[o+11],motionClock),vx=dot(p,right),vy=dot(p,up),vz=dot(p,eye),dist=zz-vz;if(dist<.2){visible=false;break}let sc=f/dist;pts.push([w*.5+vx*sc,h*.5-vy*sc]);depth+=vz}if(!visible)continue;let u=k*39,nx=a[u+3],ny=a[u+4],nz=a[u+5],rough=a[u+9],tex=a[u+12],light=clamp(.36+Math.max(0,nx*lx+ny*ly+nz*lz)*.69,.25,1.1),jitter=(Math.sin(k*79+tex*21)*.5+.5-.5)*textureLevel*.26,rgb=[0,1,2].map(c=>{let avg=(a[u+6+c]+a[u+19+c]+a[u+32+c])/3;return Math.round(255*Math.pow(clamp(avg*(light+jitter)+.03,0,1),.86))});tri.push({pts,depth:depth/3,fill:'rgb('+rgb.join(',')+')'})}
+ for(let k=0;k<mesh.tris;k+=stride){let pts=[],depth=0,visible=true;for(let v=0;v<3;v++){let o=(k*3+v)*13,x=a[o],y=a[o+1],z=a[o+2],p=cpuMove([x,y,z],a[o+11],motionClock),vx=dot(p,right),vy=dot(p,up),vz=dot(p,eye),dist=zz-vz;if(dist<.2){visible=false;break}let sc=f/dist;pts.push([w*.5+vx*sc,h*.5-vy*sc]);depth+=vz}if(!visible)continue;let u=k*39,nx=a[u+3],ny=a[u+4],nz=a[u+5],rough=a[u+9],tex=a[u+12],light=clamp(.36+Math.max(0,nx*lx+ny*ly+nz*lz)*.69,.25,1.1),jitter=(Math.sin(k*79+tex*21)*.5+.5-.5)*textureLevel*.26,cleanFlat=!shadingEnabled&&flatTextureOff,rgb=[0,1,2].map(c=>{let avg=(a[u+6+c]+a[u+19+c]+a[u+32+c])/3;if(cleanFlat)return Math.round(255*clamp(avg,0,1));let lit=shadingEnabled?Math.max(0,1+(light-1)*shadingStrength):1;let val=shadingEnabled?clamp(avg*(lit+jitter)+.03,0,1):clamp(avg*(1+jitter*.7),0,1);return Math.round(255*Math.pow(val,.86))});tri.push({pts,depth:depth/3,fill:'rgb('+rgb.join(',')+')'})}
  tri.sort((a,b)=>a.depth-b.depth);for(let t of tri){cx.fillStyle=t.fill;cx.beginPath();cx.moveTo(t.pts[0][0],t.pts[0][1]);cx.lineTo(t.pts[1][0],t.pts[1][1]);cx.lineTo(t.pts[2][0],t.pts[2][1]);cx.closePath();cx.fill()}
 }
 function frame(stamp){requestAnimationFrame(frame);let dt=lastTick?Math.min(.06,(stamp-lastTick)/1000):0;lastTick=stamp;if(isPlaying&&mesh)motionClock+=dt*motionSpeed;
  let canvas=$('glview'),dpr=Math.min(window.devicePixelRatio||1,window.innerWidth<801?1.4:2),w=Math.max(1,Math.round(canvas.clientWidth*dpr)),h=Math.max(1,Math.round(canvas.clientHeight*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;if(gl)gl.viewport(0,0,w,h);prevFrameKey=''}if(auto)rotation.yaw+=.0035;
- if(softwareMode){if(mesh){let key=[w,h,rotation.yaw.toFixed(3),rotation.pitch.toFixed(3),zoom.toFixed(2),mesh.tris,Math.floor(motionClock*12),textureLevel].join('/');if(key!==prevFrameKey){drawSoftware(w,h);prevFrameKey=key}}return}
+ if(softwareMode){if(mesh){let key=[w,h,rotation.yaw.toFixed(3),rotation.pitch.toFixed(3),zoom.toFixed(2),mesh.tris,Math.floor(motionClock*12),textureLevel,shadingEnabled?1:0,shadingStrength,flatTextureOff?1:0].join('/');if(key!==prevFrameKey){drawSoftware(w,h);prevFrameKey=key}}return}
  if(!gl)return;
  gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);if(!mesh)return;let aspect=w/h,zz=zoom*(aspect<1?.95:1),eye=[zz*Math.cos(rotation.pitch)*Math.sin(rotation.yaw),zz*Math.sin(rotation.pitch),zz*Math.cos(rotation.pitch)*Math.cos(rotation.yaw)];gl.useProgram(program);
- gl.uniformMatrix4fv(uniforms.uProj,false,matPerspective(.70,aspect,.1,120));gl.uniformMatrix4fv(uniforms.uView,false,lookAt(eye,[0,0,0],[0,1,0]));gl.uniform3f(uniforms.uEye,...eye);gl.uniform1f(uniforms.uTime,motionClock);gl.uniform1f(uniforms.uIntensity,motionAmplitude);gl.uniform1f(uniforms.uRotationPower,rotationPower);gl.uniform1f(uniforms.uIKPower,ikPower);gl.uniform1f(uniforms.uTextureStrength,textureLevel);gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
+ gl.uniformMatrix4fv(uniforms.uProj,false,matPerspective(.70,aspect,.1,120));gl.uniformMatrix4fv(uniforms.uView,false,lookAt(eye,[0,0,0],[0,1,0]));gl.uniform3f(uniforms.uEye,...eye);gl.uniform1f(uniforms.uTime,motionClock);gl.uniform1f(uniforms.uIntensity,motionAmplitude);gl.uniform1f(uniforms.uRotationPower,rotationPower);gl.uniform1f(uniforms.uIKPower,ikPower);gl.uniform1f(uniforms.uTextureStrength,textureLevel);gl.uniform1f(uniforms.uUseShading,shadingEnabled?1:0);gl.uniform1f(uniforms.uShadingStrength,shadingStrength);gl.uniform1f(uniforms.uFlatTextureOff,flatTextureOff?1:0);gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
  for(let [name,size,offset] of [['aPos',3,0],['aNormal',3,3],['aColor',3,6],['aRough',1,9],['aGlow',1,10],['aPart',1,11],['aTexture',1,12]]){let loc=attrs[name];if(loc>=0)gl.vertexAttribPointer(loc,size,gl.FLOAT,false,13*4,offset*4)}gl.drawArrays(gl.TRIANGLES,0,mesh.count)
 }
 
@@ -445,7 +454,7 @@ function savePNG(){
  ctx.drawImage(source,0,0);
  out.toBlob(b=>{if(b)download(b,'flavor-structure-'+current.seed+'.png');else toast('PNGを保存できませんでした')},'image/png');
 }
-function saveJSON(){if(!current)return;const payload={app:'Flavor Structure Lab prototype 0.5, part motion controls',created:new Date().toISOString(),palette:palette,recipe:current,animation:{clock:motionClock,playing:isPlaying,speed:motionSpeed,amplitude:motionAmplitude,rotationPower,ikPower,motionPreset,partRotationEnabled:Object.fromEntries(partRotationEnabled),textureStrength:textureLevel}};download(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'flavor-structure-'+current.seed+'.json')}
+function saveJSON(){if(!current)return;const payload={app:'Flavor Structure Lab prototype 0.7, shading and texture toggles',created:new Date().toISOString(),palette:palette,recipe:current,animation:{clock:motionClock,playing:isPlaying,speed:motionSpeed,amplitude:motionAmplitude,rotationPower,ikPower,motionPreset,partRotationEnabled:Object.fromEntries(partRotationEnabled),textureStrength:textureLevel,shadingEnabled,shadingStrength,flatTextureOff}};download(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'flavor-structure-'+current.seed+'.json')}
 function renderSaved(){let list=$('savedList');$('savedCount').textContent=saved.length+'件';list.innerHTML='';saved.forEach((item,i)=>{let line=document.createElement('div');line.style='display:flex;align-items:center;gap:7px;border:1px solid #303d48;border-radius:8px;padding:5px;';let b=document.createElement('button');b.className='btn compact';b.style='flex:1;text-align:left';b.textContent=item.seed+' · '+item.colors.slice(0,3).join(' ');b.title='再現';b.onclick=()=>generate(item.seed);let d=document.createElement('button');d.className='btn compact';d.textContent='×';d.title='削除';d.onclick=()=>{saved.splice(i,1);persist()};line.append(b,d);list.append(line)})}
 function persist(){try{localStorage.setItem('flavorlab_favorites',JSON.stringify(saved))}catch(e){toast('ブラウザ保存が利用できません')}renderSaved()}
 function wire(){
@@ -454,10 +463,12 @@ function wire(){
  $('playMotion').onclick=()=>{isPlaying=!isPlaying;const b=$('playMotion');b.textContent=isPlaying?'⏸ 一時停止':'▶ 再生';b.setAttribute('aria-pressed',String(isPlaying));prevFrameKey=''};
  $('playMotion').textContent=isPlaying?'⏸ 一時停止':'▶ 再生';$('playMotion').setAttribute('aria-pressed',String(isPlaying));
  $('restartMotion').onclick=()=>{motionClock=0;prevFrameKey='';toast('動きを先頭に戻しました')};
- for(let [id,show,action] of [['motionSpeed','motionSpeedValue',v=>motionSpeed=v/100],['motionAmount','motionAmountValue',v=>motionAmplitude=v/100],['rotationPower','rotationPowerValue',v=>rotationPower=v/100],['ikPower','ikPowerValue',v=>ikPower=v/100],['surface','surfaceValue',v=>textureLevel=v/100],['gradient','gradientValue',v=>{}]]){
+ for(let [id,show,action] of [['motionSpeed','motionSpeedValue',v=>motionSpeed=v/100],['motionAmount','motionAmountValue',v=>motionAmplitude=v/100],['rotationPower','rotationPowerValue',v=>rotationPower=v/100],['ikPower','ikPowerValue',v=>ikPower=v/100],['surface','surfaceValue',v=>textureLevel=v/100],['shadingStrength','shadingStrengthValue',v=>shadingStrength=v/100],['gradient','gradientValue',v=>{}]]){
   $(id).oninput=()=>{let val=Number($(id).value);$(show).textContent=val+'%';action(val);prevFrameKey=''};
  }
  $('motionPreset').onchange=()=>{motionPreset=$('motionPreset').value;applyMotionControls();toast('運動プリセットを切り替えました')};
+ $('shading').onchange=()=>{shadingEnabled=$('shading').checked;$('shadingStrength').disabled=!shadingEnabled;prevFrameKey='';toast(shadingEnabled?'陰影を有効にしました':'フラット表示に切り替えました')};
+ $('flatTextureOff').onchange=()=>{flatTextureOff=$('flatTextureOff').checked;prevFrameKey='';toast(flatTextureOff?'フラット表示でテクスチャを無効化します':'フラット表示でテクスチャを残します')};
  $('partGroup').onchange=renderPartControls;
  $('rotAllOn').onclick=()=>setVisibleRotations(true);$('rotAllOff').onclick=()=>setVisibleRotations(false);
  $('gradient').onchange=()=>{if(current)generate(current.seed)};
